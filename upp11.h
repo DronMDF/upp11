@@ -5,13 +5,14 @@
 
 namespace upp11 {
 
-class Test {
+class TestInvoker {
 public:
-	virtual void operator()() = 0;
+	virtual void invoke() = 0;
 };
 
 class TestCollection {
-	std::list<Test *> tests;
+private:
+	std::list<TestInvoker *> tests;
 
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -19,7 +20,7 @@ class TestCollection {
 	};
 
 public:
-	static void addTest(class Test *test)
+	static void addTest(class TestInvoker *test)
 	{
 		TestCollection &collection = getInstance();
 		collection.tests.push_back(test);
@@ -29,15 +30,22 @@ public:
 	{
 		TestCollection &collection = getInstance();
 		for (auto *t: collection.tests) {
-			(*t)();
+			t->invoke();
 		}
 	}
 };
 
-class TestRegistrar : public Test {
-protected:
-	TestRegistrar() {
-		TestCollection::addTest(this); \
+template <typename T>
+class TestInvokerImpl : public TestInvoker {
+public:
+	TestInvokerImpl() {
+		TestCollection::addTest(this);
+	}
+
+private:
+	void invoke() override {
+		T test;
+		test();
 	}
 };
 
@@ -47,10 +55,11 @@ protected:
 	upp11::TestCollection::runAllTests()
 
 #define UP_TEST(name) \
-class Test##name : public upp11::TestRegistrar { \
-	void operator()() override; \
+class Test##name { \
+public: \
+	void operator()(); \
 }; \
-static Test##name test##name##instance; \
+static upp11::TestInvokerImpl<Test##name> test##name##invoker; \
 void Test##name::operator()()
 
 #define UP_FAIL(msg) \
