@@ -73,6 +73,14 @@ public: \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker; \
 void Test##name::operator()()
 
+#define UP_FIXTURE_TEST(name, fixture) \
+class Test##name : public fixture { \
+public: \
+	void operator()(); \
+}; \
+static upp11::TestInvokerTrivial<Test##name> test##name##invoker; \
+void Test##name::operator()()
+
 #define UP_PARAMETRIZED_TEST(name, params, ...) \
 class Test##name { \
 public: \
