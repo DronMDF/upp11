@@ -1,14 +1,15 @@
 
 #pragma once
+#include <algorithm>
 #include <functional>
 #include <iostream>
-#include <list>
+#include <vector>
 
 namespace upp11 {
 
 class TestCollection {
 private:
-	std::list<std::function<void ()>> tests;
+	std::vector<std::function<void ()>> tests;
 
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -22,9 +23,13 @@ public:
 		collection.tests.push_back(test);
 	}
 
-	static void runAllTests()
+	static void runAllTests(unsigned seed)
 	{
 		TestCollection &collection = getInstance();
+		if (seed != 0) {
+			std::default_random_engine r(seed);
+			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
+		}
 		for (auto t: collection.tests) {
 			t();
 		}
@@ -63,7 +68,9 @@ public:
 } // end of namespace upp11
 
 #define UP_RUN() \
-	upp11::TestCollection::runAllTests()
+	upp11::TestCollection::runAllTests(0)
+#define UP_RUN_SHUFFLED(seed) \
+	upp11::TestCollection::runAllTests(seed)
 
 #define UP_TEST(name) \
 class Test##name { \

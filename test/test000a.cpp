@@ -24,5 +24,5 @@ UP_FIXTURE_TEST(test000af, fixture)
 
 int main(int, char **)
 {
-	UP_RUN();
+	UP_RUN_SHUFFLED(time(0));
 }
