@@ -89,5 +89,13 @@ public: \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(params); \
 void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 
+#define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
+class Test##name : public fixture { \
+public: \
+	void operator()(const tuple<__VA_ARGS__> &params); \
+}; \
+static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(params); \
+void Test##name::operator()(const tuple<__VA_ARGS__> &params)
+
 #define UP_FAIL(msg) \
 	std::cout << msg << std::endl;
