@@ -1,18 +1,14 @@
 
 #pragma once
-#include <list>
+#include <functional>
 #include <iostream>
+#include <list>
 
 namespace upp11 {
 
-class TestInvoker {
-public:
-	virtual void invoke() = 0;
-};
-
 class TestCollection {
 private:
-	std::list<TestInvoker *> tests;
+	std::list<std::function<void ()>> tests;
 
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -20,7 +16,7 @@ private:
 	};
 
 public:
-	static void addTest(class TestInvoker *test)
+	static void addTest(std::function<void ()> test)
 	{
 		TestCollection &collection = getInstance();
 		collection.tests.push_back(test);
@@ -29,23 +25,22 @@ public:
 	static void runAllTests()
 	{
 		TestCollection &collection = getInstance();
-		for (auto *t: collection.tests) {
-			t->invoke();
+		for (auto t: collection.tests) {
+			t();
 		}
 	}
 };
 
 template <typename T>
-class TestInvokerImpl : public TestInvoker {
-public:
-	TestInvokerImpl() {
-		TestCollection::addTest(this);
-	}
-
+class TestInvokerImpl {
 private:
-	void invoke() override {
+	void invoke() {
 		T test;
 		test();
+	}
+public:
+	TestInvokerImpl() {
+		TestCollection::addTest(std::bind(&TestInvokerImpl::invoke, this));
 	}
 };
 
