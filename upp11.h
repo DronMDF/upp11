@@ -32,15 +32,31 @@ public:
 };
 
 template <typename T>
-class TestInvokerImpl {
+class TestInvokerTrivial {
 private:
 	void invoke() {
 		T test;
 		test();
 	}
 public:
-	TestInvokerImpl() {
-		TestCollection::addTest(std::bind(&TestInvokerImpl::invoke, this));
+	TestInvokerTrivial() {
+		TestCollection::addTest(std::bind(&TestInvokerTrivial::invoke, this));
+	}
+};
+
+template <typename T, typename ...V>
+class TestInvokerParametrized {
+private:
+	void invoke(const std::tuple<V...> &params) {
+		T test;
+		test(params);
+	}
+public:
+	TestInvokerParametrized(const std::initializer_list<const std::tuple<V...>> &params)
+	{
+		for (const auto v: params) {
+			TestCollection::addTest(std::bind(&TestInvokerParametrized::invoke, this, v));
+		}
 	}
 };
 
@@ -54,8 +70,16 @@ class Test##name { \
 public: \
 	void operator()(); \
 }; \
-static upp11::TestInvokerImpl<Test##name> test##name##invoker; \
+static upp11::TestInvokerTrivial<Test##name> test##name##invoker; \
 void Test##name::operator()()
+
+#define UP_PARAMETRIZED_TEST(name, params, ...) \
+class Test##name { \
+public: \
+	void operator()(const tuple<__VA_ARGS__> &params); \
+}; \
+static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(params); \
+void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 
 #define UP_FAIL(msg) \
 	std::cout << msg << std::endl;
