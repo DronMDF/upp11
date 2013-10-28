@@ -4,3 +4,4 @@ test/test000a.cpp
 test/test000b.cpp
 upp11.h
 Makefile
+test/test002.cpp

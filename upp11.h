@@ -9,7 +9,7 @@ namespace upp11 {
 
 class TestCollection {
 private:
-	std::vector<std::function<void ()>> tests;
+	std::vector<std::pair<std::string, std::function<bool ()>>> tests;
 
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -17,10 +17,10 @@ private:
 	};
 
 public:
-	static void addTest(std::function<void ()> test)
+	static void addTest(const std::string &name, std::function<bool ()> test)
 	{
 		TestCollection &collection = getInstance();
-		collection.tests.push_back(test);
+		collection.tests.push_back(std::make_pair(name, test));
 	}
 
 	static void runAllTests(unsigned seed)
@@ -31,7 +31,8 @@ public:
 			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
 		}
 		for (auto t: collection.tests) {
-			t();
+			const bool result = t.second();
+			std::cout << t.first << ": " << (result ? "SUCCESS" : "FAIL") << std::endl;
 		}
 	}
 };
@@ -39,28 +40,32 @@ public:
 template <typename T>
 class TestInvokerTrivial {
 private:
-	void invoke() {
+	bool invoke() {
 		T test;
 		test();
+		return true;
 	}
 public:
-	TestInvokerTrivial() {
-		TestCollection::addTest(std::bind(&TestInvokerTrivial::invoke, this));
+	TestInvokerTrivial(const std::string &name) {
+		TestCollection::addTest(name, std::bind(&TestInvokerTrivial::invoke, this));
 	}
 };
 
 template <typename T, typename ...V>
 class TestInvokerParametrized {
 private:
-	void invoke(const std::tuple<V...> &params) {
+	bool invoke(const std::tuple<V...> &params) {
 		T test;
 		test(params);
+		return true;
 	}
 public:
-	TestInvokerParametrized(const std::initializer_list<const std::tuple<V...>> &params)
+	TestInvokerParametrized(const std::string &name,
+		const std::initializer_list<const std::tuple<V...>> &params)
 	{
 		for (const auto v: params) {
-			TestCollection::addTest(std::bind(&TestInvokerParametrized::invoke, this, v));
+			TestCollection::addTest(name,
+				std::bind(&TestInvokerParametrized::invoke, this, v));
 		}
 	}
 };
@@ -77,7 +82,7 @@ class Test##name { \
 public: \
 	void operator()(); \
 }; \
-static upp11::TestInvokerTrivial<Test##name> test##name##invoker; \
+static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::operator()()
 
 #define UP_FIXTURE_TEST(name, fixture) \
@@ -85,7 +90,7 @@ class Test##name : public fixture { \
 public: \
 	void operator()(); \
 }; \
-static upp11::TestInvokerTrivial<Test##name> test##name##invoker; \
+static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::operator()()
 
 #define UP_PARAMETRIZED_TEST(name, params, ...) \
@@ -93,7 +98,7 @@ class Test##name { \
 public: \
 	void operator()(const tuple<__VA_ARGS__> &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(params); \
+static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
 void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 
 #define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
@@ -101,7 +106,7 @@ class Test##name : public fixture { \
 public: \
 	void operator()(const tuple<__VA_ARGS__> &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(params); \
+static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
 void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 
 #define UP_FAIL(msg) \
