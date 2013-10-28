@@ -10,6 +10,7 @@ namespace upp11 {
 class TestCollection {
 private:
 	std::vector<std::pair<std::string, std::function<bool ()>>> tests;
+	std::vector<std::string> suites;
 
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -20,7 +21,11 @@ public:
 	static void addTest(const std::string &name, std::function<bool ()> test)
 	{
 		TestCollection &collection = getInstance();
-		collection.tests.push_back(std::make_pair(name, test));
+		std::string path;
+		for (auto s: collection.suites) {
+			path += s + "/";
+		}
+		collection.tests.push_back(std::make_pair(path + name, test));
 	}
 
 	static void runAllTests(unsigned seed)
@@ -34,6 +39,32 @@ public:
 			const bool result = t.second();
 			std::cout << t.first << ": " << (result ? "SUCCESS" : "FAIL") << std::endl;
 		}
+	}
+
+	static void beginSuite(const std::string &name)
+	{
+		TestCollection &collection = getInstance();
+		collection.suites.push_back(name);
+	}
+
+	static void endSuite()
+	{
+		TestCollection &collection = getInstance();
+		collection.suites.pop_back();
+	}
+};
+
+class TestSuiteBegin {
+public:
+	TestSuiteBegin(const std::string &name) {
+		TestCollection::beginSuite(name);
+	}
+};
+
+class TestSuiteEnd {
+public:
+	TestSuiteEnd() {
+		TestCollection::endSuite();
 	}
 };
 
@@ -76,6 +107,14 @@ public:
 	upp11::TestCollection::runAllTests(0)
 #define UP_RUN_SHUFFLED(seed) \
 	upp11::TestCollection::runAllTests(seed)
+
+#define UP_SUITE_BEGIN(name) \
+namespace name { \
+	static upp11::TestSuiteBegin suite_begin(#name);
+
+#define UP_SUITE_END() \
+	static upp11::TestSuiteEnd suite_end; \
+}
 
 #define UP_TEST(name) \
 class Test##name { \

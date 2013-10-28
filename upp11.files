@@ -5,3 +5,5 @@ test/test000b.cpp
 upp11.h
 Makefile
 test/test002.cpp
+test/test002.cpp
+test/test001.cpp

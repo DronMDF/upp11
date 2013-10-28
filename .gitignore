@@ -13,4 +13,7 @@
 *.a
 
 *.creator.user
+*.actual
 test000
+test001
+test002
