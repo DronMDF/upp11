@@ -2,6 +2,7 @@
 #pragma once
 #include <algorithm>
 #include <cstdlib>
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -43,9 +44,8 @@ public:
 		collection.tests.push_back(std::make_pair(path + name, test));
 	}
 
-	static bool runAllTests(unsigned seed, bool quiet)
+	static bool runAllTests(unsigned seed, bool quiet, bool timestamp)
 	{
-		bool failure = false;
 		TestCollection &collection = getInstance();
 		if (seed != 0) {
 			if (!quiet) {
@@ -54,11 +54,19 @@ public:
 			std::default_random_engine r(seed);
 			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
 		}
+		bool failure = false;
 		for (auto t: collection.tests) {
+			using namespace std::chrono;
+			const high_resolution_clock::time_point st = high_resolution_clock::now();
 			const bool success = t.second();
+			const high_resolution_clock::time_point et = high_resolution_clock::now();
+			const unsigned us = duration_cast<microseconds>(et - st).count();
 			if (!quiet || !success) {
-				std::cout << t.first << ": " <<
-					(success ? "SUCCESS" : "FAIL") << std::endl;
+				std::cout << t.first;
+				if (timestamp) {
+					std::cout << " (" << us << "us)";
+				}
+				std::cout << ": " << (success ? "SUCCESS" : "FAIL") << std::endl;
 			}
 			failure |= !success;
 		}
@@ -150,14 +158,16 @@ class TestMain {
 public:
 	int main(int argc, char **argv) {
 		bool quiet = false;
+		bool timestamp = false;
 		int seed = time(0);
 		while (true) {
-			int opt = getopt(argc, argv, "qs:");
+			int opt = getopt(argc, argv, "qts:");
 			if (opt == -1) { break; }
 			if (opt == 'q') { quiet = true; }
+			if (opt == 't') { timestamp = true; }
 			if (opt == 's') { seed = std::atoi(optarg); }
 		};
-		return TestCollection::runAllTests(seed, quiet) ? 0 : -1;
+		return TestCollection::runAllTests(seed, quiet, timestamp) ? 0 : -1;
 	}
 };
 
@@ -169,9 +179,9 @@ int main(int argc, char **argv) { \
 }
 
 #define UP_RUN() \
-upp11::TestCollection::runAllTests(0, false)
+upp11::TestCollection::runAllTests(0, false, false)
 #define UP_RUN_SHUFFLED(seed) \
-upp11::TestCollection::runAllTests(seed, false)
+upp11::TestCollection::runAllTests(seed, false, false)
 
 #define UP_SUITE_BEGIN(name) \
 namespace name { \
