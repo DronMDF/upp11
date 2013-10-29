@@ -20,6 +20,20 @@ UP_TEST(InvokerShouldCatchAllExceptionInTestCtor)
 	UP_ASSERT(!invoker.invoke());
 }
 
+UP_TEST(ParametrizedShouldCatchAllExceptionInTestCtor)
+{
+	// Given
+	struct TestWithException {
+		TestWithException() {
+			throw runtime_error("setUp exception");
+		}
+		void operator()(const tuple<> &) {};
+	};
+	TestInvokerParametrized<TestWithException> invoker("", {});
+	// When/Then
+	UP_ASSERT(!invoker.invoke(make_tuple()));
+}
+
 UP_SUITE_END()
 
 UP_MAIN()

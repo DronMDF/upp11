@@ -69,6 +69,9 @@ public:
 	}
 };
 
+class TestException : public std::exception {
+};
+
 template <typename T>
 class TestInvokerTrivial {
 public:
@@ -76,6 +79,8 @@ public:
 		std::shared_ptr<T> instance;
 		try {
 			instance = std::make_shared<T>();
+		} catch (const TestException &) {
+			return false;
 		} catch (const std::exception &e) {
 			std::cout << "exception from test: " << e.what() << std::endl;
 			return false;
@@ -84,7 +89,18 @@ public:
 			return false;
 		}
 
-		(*instance)();
+		try {
+			(*instance)();
+		} catch (const TestException &) {
+			return false;
+		} catch (const std::exception &e) {
+			std::cout << "exception from test: " << e.what() << std::endl;
+			return false;
+		} catch (...) {
+			std::cout << "unknown exception from test" << std::endl;
+			return false;
+		}
+
 		return true;
 	}
 	TestInvokerTrivial(const std::string &name) {
@@ -94,13 +110,35 @@ public:
 
 template <typename T, typename ...V>
 class TestInvokerParametrized {
-private:
+public:
 	bool invoke(const std::tuple<V...> &params) {
-		T test;
-		test(params);
+		std::shared_ptr<T> instance;
+		try {
+			instance = std::make_shared<T>();
+		} catch (const TestException &) {
+			return false;
+		} catch (const std::exception &e) {
+			std::cout << "exception from test: " << e.what() << std::endl;
+			return false;
+		} catch (...) {
+			std::cout << "unknown exception from test" << std::endl;
+			return false;
+		}
+
+		try {
+			(*instance)(params);
+		} catch (const TestException &) {
+			return false;
+		} catch (const std::exception &e) {
+			std::cout << "exception from test: " << e.what() << std::endl;
+			return false;
+		} catch (...) {
+			std::cout << "unknown exception from test" << std::endl;
+			return false;
+		}
+
 		return true;
 	}
-public:
 	TestInvokerParametrized(const std::string &name,
 		const std::initializer_list<const std::tuple<V...>> &params)
 	{
@@ -132,32 +170,28 @@ namespace name { \
 }
 
 #define UP_TEST(name) \
-class Test##name { \
-public: \
+struct Test##name { \
 	void operator()(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::operator()()
 
 #define UP_FIXTURE_TEST(name, fixture) \
-class Test##name : public fixture { \
-public: \
+struct Test##name : public fixture { \
 	void operator()(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::operator()()
 
 #define UP_PARAMETRIZED_TEST(name, params, ...) \
-class Test##name { \
-public: \
+struct Test##name { \
 	void operator()(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
 void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 
 #define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
-class Test##name : public fixture { \
-public: \
+struct Test##name : public fixture { \
 	void operator()(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
@@ -167,6 +201,7 @@ void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 std::cout << msg << std::endl;
 
 #define UP_ASSERT(expr) \
-if (!expr) { \
+if (!(expr)) { \
 	std::cout << __FILE__ << "(" << __LINE__ << "): check " << #expr << " failed" << std::endl; \
+	throw TestException(); \
 }
