@@ -19,6 +19,19 @@ UP_TEST(InvokerShouldCatchAllExceptionInTestCtor)
 	UP_ASSERT(!invoker.invoke([](TestWithException *){}));
 }
 
+UP_TEST(InvokerShouldCatchAllUnknownExceptionInTestCtor)
+{
+	// Given
+	struct TestWithException {
+		TestWithException() {
+			throw 1;
+		}
+	};
+	TestInvoker<TestWithException> invoker;
+	// When/Then
+	UP_ASSERT(!invoker.invoke([](TestWithException *){}));
+}
+
 UP_TEST(InvokerShouldCatchAllExceptionInTestRun)
 {
 	// Given
@@ -26,6 +39,15 @@ UP_TEST(InvokerShouldCatchAllExceptionInTestRun)
 	TestInvoker<Test> invoker;
 	// When/Then
 	UP_ASSERT(!invoker.invoke([](Test *){ throw runtime_error("run exception"); }));
+}
+
+UP_TEST(InvokerShouldCatchAllUnknownExceptionInTestRun)
+{
+	// Given
+	struct Test {};
+	TestInvoker<Test> invoker;
+	// When/Then
+	UP_ASSERT(!invoker.invoke([](Test *){ throw 1; }));
 }
 
 UP_SUITE_END()
