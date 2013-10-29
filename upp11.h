@@ -83,10 +83,10 @@ public:
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
-			std::cout << "exception from test: " << e.what() << std::endl;
+			std::cout << "exception from test ctor: " << e.what() << std::endl;
 			return false;
 		} catch (...) {
-			std::cout << "unknown exception from test" << std::endl;
+			std::cout << "unknown exception from test ctor" << std::endl;
 			return false;
 		}
 
@@ -95,10 +95,10 @@ public:
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
-			std::cout << "exception from test: " << e.what() << std::endl;
+			std::cout << "exception from test run: " << e.what() << std::endl;
 			return false;
 		} catch (...) {
-			std::cout << "unknown exception from test" << std::endl;
+			std::cout << "unknown exception from test run" << std::endl;
 			return false;
 		}
 
