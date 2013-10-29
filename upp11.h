@@ -72,10 +72,11 @@ public:
 class TestException : public std::exception {
 };
 
+
 template <typename T>
-class TestInvokerTrivial {
+class TestInvoker {
 public:
-	bool invoke() {
+	bool invoke(std::function<void (T *)> test_function) const {
 		std::shared_ptr<T> instance;
 		try {
 			instance = std::make_shared<T>();
@@ -90,7 +91,7 @@ public:
 		}
 
 		try {
-			(*instance)();
+			test_function(instance.get());
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
@@ -103,42 +104,27 @@ public:
 
 		return true;
 	}
+};
+
+template <typename T>
+class TestInvokerTrivial : public TestInvoker<T> {
+private:
+	bool invoke() {
+		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1));
+	}
+public:
 	TestInvokerTrivial(const std::string &name) {
 		TestCollection::addTest(name, std::bind(&TestInvokerTrivial::invoke, this));
 	}
 };
 
 template <typename T, typename ...V>
-class TestInvokerParametrized {
-public:
+class TestInvokerParametrized : public TestInvoker<T> {
+private:
 	bool invoke(const std::tuple<V...> &params) {
-		std::shared_ptr<T> instance;
-		try {
-			instance = std::make_shared<T>();
-		} catch (const TestException &) {
-			return false;
-		} catch (const std::exception &e) {
-			std::cout << "exception from test: " << e.what() << std::endl;
-			return false;
-		} catch (...) {
-			std::cout << "unknown exception from test" << std::endl;
-			return false;
-		}
-
-		try {
-			(*instance)(params);
-		} catch (const TestException &) {
-			return false;
-		} catch (const std::exception &e) {
-			std::cout << "exception from test: " << e.what() << std::endl;
-			return false;
-		} catch (...) {
-			std::cout << "unknown exception from test" << std::endl;
-			return false;
-		}
-
-		return true;
+		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
 	}
+public:
 	TestInvokerParametrized(const std::string &name,
 		const std::initializer_list<const std::tuple<V...>> &params)
 	{
@@ -171,31 +157,31 @@ namespace name { \
 
 #define UP_TEST(name) \
 struct Test##name { \
-	void operator()(); \
+	void run(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
-void Test##name::operator()()
+void Test##name::run()
 
 #define UP_FIXTURE_TEST(name, fixture) \
 struct Test##name : public fixture { \
-	void operator()(); \
+	void run(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
-void Test##name::operator()()
+void Test##name::run()
 
 #define UP_PARAMETRIZED_TEST(name, params, ...) \
 struct Test##name { \
-	void operator()(const tuple<__VA_ARGS__> &params); \
+	void run(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
-void Test##name::operator()(const tuple<__VA_ARGS__> &params)
+void Test##name::run(const tuple<__VA_ARGS__> &params)
 
 #define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
 struct Test##name : public fixture { \
-	void operator()(const tuple<__VA_ARGS__> &params); \
+	void run(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
-void Test##name::operator()(const tuple<__VA_ARGS__> &params)
+void Test##name::run(const tuple<__VA_ARGS__> &params)
 
 #define UP_FAIL(msg) \
 std::cout << msg << std::endl;
