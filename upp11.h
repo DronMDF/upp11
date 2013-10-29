@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 namespace upp11 {
@@ -70,13 +71,22 @@ public:
 
 template <typename T>
 class TestInvokerTrivial {
-private:
+public:
 	bool invoke() {
-		T test;
-		test();
+		std::shared_ptr<T> instance;
+		try {
+			instance = std::make_shared<T>();
+		} catch (const std::exception &e) {
+			std::cout << "exception from test: " << e.what() << std::endl;
+			return false;
+		} catch (...) {
+			std::cout << "unknown exception from test" << std::endl;
+			return false;
+		}
+
+		(*instance)();
 		return true;
 	}
-public:
 	TestInvokerTrivial(const std::string &name) {
 		TestCollection::addTest(name, std::bind(&TestInvokerTrivial::invoke, this));
 	}
@@ -103,10 +113,15 @@ public:
 
 } // end of namespace upp11
 
+#define UP_MAIN() \
+int main(int, char **) { \
+	UP_RUN_SHUFFLED(time(0)); \
+}
+
 #define UP_RUN() \
-	upp11::TestCollection::runAllTests(0)
+upp11::TestCollection::runAllTests(0)
 #define UP_RUN_SHUFFLED(seed) \
-	upp11::TestCollection::runAllTests(seed)
+upp11::TestCollection::runAllTests(seed)
 
 #define UP_SUITE_BEGIN(name) \
 namespace name { \
@@ -149,4 +164,9 @@ static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invok
 void Test##name::operator()(const tuple<__VA_ARGS__> &params)
 
 #define UP_FAIL(msg) \
-	std::cout << msg << std::endl;
+std::cout << msg << std::endl;
+
+#define UP_ASSERT(expr) \
+if (!expr) { \
+	std::cout << __FILE__ << "(" << __LINE__ << "): check " << #expr << " failed" << std::endl; \
+}

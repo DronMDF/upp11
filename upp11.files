@@ -7,3 +7,4 @@ Makefile
 test/test002.cpp
 test/test002.cpp
 test/test001.cpp
+test/testupp.cpp
