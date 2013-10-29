@@ -29,8 +29,9 @@ public:
 		collection.tests.push_back(std::make_pair(path + name, test));
 	}
 
-	static void runAllTests(unsigned seed)
+	static bool runAllTests(unsigned seed)
 	{
+		bool failure = false;
 		TestCollection &collection = getInstance();
 		if (seed != 0) {
 			std::default_random_engine r(seed);
@@ -39,7 +40,9 @@ public:
 		for (auto t: collection.tests) {
 			const bool result = t.second();
 			std::cout << t.first << ": " << (result ? "SUCCESS" : "FAIL") << std::endl;
+			failure |= !result;
 		}
+		return !failure;
 	}
 
 	static void beginSuite(const std::string &name)
@@ -139,7 +142,7 @@ public:
 
 #define UP_MAIN() \
 int main(int, char **) { \
-	UP_RUN_SHUFFLED(time(0)); \
+	return upp11::TestCollection::runAllTests(time(0)) ? 0 : -1; \
 }
 
 #define UP_RUN() \
