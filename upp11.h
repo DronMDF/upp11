@@ -1,6 +1,7 @@
 
 #pragma once
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -47,6 +48,9 @@ public:
 		bool failure = false;
 		TestCollection &collection = getInstance();
 		if (seed != 0) {
+			if (!quiet) {
+				std::cout << "random seed: " << seed << std::endl;
+			}
 			std::default_random_engine r(seed);
 			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
 		}
@@ -146,12 +150,14 @@ class TestMain {
 public:
 	int main(int argc, char **argv) {
 		bool quiet = false;
+		int seed = time(0);
 		while (true) {
-			int opt = getopt(argc, argv, "q");
+			int opt = getopt(argc, argv, "qs:");
 			if (opt == -1) { break; }
 			if (opt == 'q') { quiet = true; }
+			if (opt == 's') { seed = std::atoi(optarg); }
 		};
-		return TestCollection::runAllTests(time(0), quiet) ? 0 : -1;
+		return TestCollection::runAllTests(seed, quiet) ? 0 : -1;
 	}
 };
 
