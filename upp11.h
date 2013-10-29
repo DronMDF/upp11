@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <getopt.h>
 
 namespace upp11 {
 
@@ -19,32 +20,6 @@ private:
 	};
 
 public:
-	static void addTest(const std::string &name, std::function<bool ()> test)
-	{
-		TestCollection &collection = getInstance();
-		std::string path;
-		for (auto s: collection.suites) {
-			path += s + "/";
-		}
-		collection.tests.push_back(std::make_pair(path + name, test));
-	}
-
-	static bool runAllTests(unsigned seed)
-	{
-		bool failure = false;
-		TestCollection &collection = getInstance();
-		if (seed != 0) {
-			std::default_random_engine r(seed);
-			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
-		}
-		for (auto t: collection.tests) {
-			const bool result = t.second();
-			std::cout << t.first << ": " << (result ? "SUCCESS" : "FAIL") << std::endl;
-			failure |= !result;
-		}
-		return !failure;
-	}
-
 	static void beginSuite(const std::string &name)
 	{
 		TestCollection &collection = getInstance();
@@ -55,6 +30,35 @@ public:
 	{
 		TestCollection &collection = getInstance();
 		collection.suites.pop_back();
+	}
+
+	static void addTest(const std::string &name, std::function<bool ()> test)
+	{
+		TestCollection &collection = getInstance();
+		std::string path;
+		for (auto s: collection.suites) {
+			path += s + "/";
+		}
+		collection.tests.push_back(std::make_pair(path + name, test));
+	}
+
+	static bool runAllTests(unsigned seed, bool quiet)
+	{
+		bool failure = false;
+		TestCollection &collection = getInstance();
+		if (seed != 0) {
+			std::default_random_engine r(seed);
+			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
+		}
+		for (auto t: collection.tests) {
+			const bool success = t.second();
+			if (!quiet || !success) {
+				std::cout << t.first << ": " <<
+					(success ? "SUCCESS" : "FAIL") << std::endl;
+			}
+			failure |= !success;
+		}
+		return !failure;
 	}
 };
 
@@ -138,17 +142,30 @@ public:
 	}
 };
 
+class TestMain {
+public:
+	int main(int argc, char **argv) {
+		bool quiet = false;
+		while (true) {
+			int opt = getopt(argc, argv, "q");
+			if (opt == -1) { break; }
+			if (opt == 'q') { quiet = true; }
+		};
+		return TestCollection::runAllTests(time(0), quiet) ? 0 : -1;
+	}
+};
+
 } // end of namespace upp11
 
 #define UP_MAIN() \
-int main(int, char **) { \
-	return upp11::TestCollection::runAllTests(time(0)) ? 0 : -1; \
+int main(int argc, char **argv) { \
+	return TestMain().main(argc, argv); \
 }
 
 #define UP_RUN() \
-upp11::TestCollection::runAllTests(0)
+upp11::TestCollection::runAllTests(0, false)
 #define UP_RUN_SHUFFLED(seed) \
-upp11::TestCollection::runAllTests(seed)
+upp11::TestCollection::runAllTests(seed, false)
 
 #define UP_SUITE_BEGIN(name) \
 namespace name { \
