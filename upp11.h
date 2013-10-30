@@ -247,3 +247,10 @@ if (!isEqual((A), (B))) { \
 	std::cout << "\t" << (A) << " != " << (B) << std::endl; \
 	throw TestException(); \
 }
+
+#define UP_ASSERT_NE(A, B) \
+if (isEqual((A), (B))) { \
+	std::cout << __FILE__ "(" << __LINE__ << "): check " #A " != " #B " failed" << std::endl; \
+	std::cout << "\t" << (A) << " == " << (B) << std::endl; \
+	throw TestException(); \
+}

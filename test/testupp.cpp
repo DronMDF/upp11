@@ -58,12 +58,14 @@ UP_TEST(EqualShouldThrow)
 {
 	TestBase base;
 	UP_ASSERT(!base.isEqual(1, 0));
+	UP_ASSERT(!base.isEqual(1, "0"));
 	UP_ASSERT(!base.isEqual("te", "next"));
 	UP_ASSERT(base.isEqual(100, 100));
 	UP_ASSERT(base.isEqual("last", "last"));
 
-	//UP_ASSERT_NE(1, 0);
-	//UP_ASSERT_NE("te", "next");
+	UP_ASSERT_NE(1, 0);
+	UP_ASSERT_NE(0, "null");
+	UP_ASSERT_NE("te", "next");
 	UP_ASSERT_EQUAL(100, 100);
 	UP_ASSERT_EQUAL("last", "last");
 }
