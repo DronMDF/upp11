@@ -52,4 +52,22 @@ UP_TEST(InvokerShouldCatchAllUnknownExceptionInTestRun)
 
 UP_SUITE_END()
 
+UP_SUITE_BEGIN(suiteAssertions)
+
+UP_TEST(EqualShouldThrow)
+{
+	TestBase base;
+	UP_ASSERT(!base.isEqual(1, 0));
+	UP_ASSERT(!base.isEqual("te", "next"));
+	UP_ASSERT(base.isEqual(100, 100));
+	UP_ASSERT(base.isEqual("last", "last"));
+
+	//UP_ASSERT_NE(1, 0);
+	//UP_ASSERT_NE("te", "next");
+	UP_ASSERT_EQUAL(100, 100);
+	UP_ASSERT_EQUAL("last", "last");
+}
+
+UP_SUITE_END()
+
 UP_MAIN()

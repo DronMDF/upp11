@@ -26,4 +26,4 @@ UP_FIXTURE_TEST(test000af, fixture)
 
 UP_SUITE_END()
 
-UP_MAIN();
+UP_MAIN()

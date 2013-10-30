@@ -92,9 +92,7 @@ public:
 	}
 };
 
-class TestException : public std::exception {
-};
-
+class TestException {};
 
 template <typename T>
 class TestInvoker {
@@ -158,6 +156,20 @@ public:
 	}
 };
 
+struct TestBase {
+	bool isEqual(const std::string &a, const std::string &b) {
+		return a == b;
+	}
+	template <typename T>
+	bool isEqual(const T &a, const T &b) {
+		return a == b;
+	}
+	template <typename A, typename B>
+	bool isEqual(const A &, const B &) {
+		return false;
+	}
+};
+
 class TestMain {
 public:
 	int main(int argc, char **argv) {
@@ -196,28 +208,28 @@ namespace name { \
 }
 
 #define UP_TEST(name) \
-struct Test##name { \
+struct Test##name : private upp11::TestBase { \
 	void run(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::run()
 
 #define UP_FIXTURE_TEST(name, fixture) \
-struct Test##name : public fixture { \
+struct Test##name : private upp11::TestBase, public fixture { \
 	void run(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::run()
 
 #define UP_PARAMETRIZED_TEST(name, params, ...) \
-struct Test##name { \
+struct Test##name : private upp11::TestBase { \
 	void run(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
 void Test##name::run(const tuple<__VA_ARGS__> &params)
 
 #define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
-struct Test##name : public fixture { \
+struct Test##name : private upp11::TestBase, public fixture { \
 	void run(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
@@ -225,6 +237,13 @@ void Test##name::run(const tuple<__VA_ARGS__> &params)
 
 #define UP_ASSERT(expr) \
 if (!(expr)) { \
-	std::cout << __FILE__ << "(" << __LINE__ << "): check " << #expr << " failed" << std::endl; \
+	std::cout << __FILE__ "(" << __LINE__ << "): check " #expr " failed" << std::endl; \
+	throw TestException(); \
+}
+
+#define UP_ASSERT_EQUAL(A, B) \
+if (!isEqual((A), (B))) { \
+	std::cout << __FILE__ "(" << __LINE__ << "): check " #A " == " #B " failed" << std::endl; \
+	std::cout << "\t" << (A) << " != " << (B) << std::endl; \
 	throw TestException(); \
 }
