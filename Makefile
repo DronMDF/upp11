@@ -1,15 +1,17 @@
 
 check: testupp test000 test001 test002
-	@./testupp
+	@./testupp -q
 	@echo testupp SUCCESS
 
-	#./test000
+	@./test000 -s 0 > test000.actual
+	@diff -du test000.actual test/test000.expected
+	@echo test000 SUCCESS
 
-	@./test001 > test001.actual
+	@./test001 -s 0 > test001.actual
 	@diff -du test001.actual test/test001.expected
 	@echo test001 SUCCESS
 
-	@./test002 > test002.actual
+	@./test002 -s 0 > test002.actual
 	@diff -du test002.actual test/test002.expected
 	@echo test002 SUCCESS
 

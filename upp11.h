@@ -13,7 +13,8 @@ namespace upp11 {
 
 class TestCollection {
 private:
-	std::vector<std::pair<std::string, std::function<bool ()>>> tests;
+	typedef std::pair<std::string, std::function<bool ()>> test_pair_t;
+	std::vector<test_pair_t> tests;
 	std::vector<std::string> suites;
 
 	static TestCollection &getInstance() {
@@ -47,6 +48,9 @@ public:
 	static bool runAllTests(unsigned seed, bool quiet, bool timestamp)
 	{
 		TestCollection &collection = getInstance();
+		// Отсортируем все по именам, чтобы не зависело от порядка линковки
+		std::sort(collection.tests.begin(), collection.tests.end(),
+			[](const test_pair_t &A, const test_pair_t &B){ return A.first < B.first; });
 		if (seed != 0) {
 			if (!quiet) {
 				std::cout << "random seed: " << seed << std::endl;
@@ -175,7 +179,7 @@ public:
 
 #define UP_MAIN() \
 int main(int argc, char **argv) { \
-	return TestMain().main(argc, argv); \
+	return upp11::TestMain().main(argc, argv); \
 }
 
 #define UP_RUN() \
@@ -218,9 +222,6 @@ struct Test##name : public fixture { \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
 void Test##name::run(const tuple<__VA_ARGS__> &params)
-
-#define UP_FAIL(msg) \
-std::cout << msg << std::endl;
 
 #define UP_ASSERT(expr) \
 if (!(expr)) { \

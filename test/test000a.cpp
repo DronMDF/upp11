@@ -3,9 +3,11 @@
 
 using namespace std;
 
+UP_SUITE_BEGIN(suiteTrivial)
+
 UP_TEST(test000a)
 {
-	UP_FAIL(__PRETTY_FUNCTION__);
+	cout << __PRETTY_FUNCTION__ << endl;
 }
 
 struct fixture {
@@ -19,10 +21,9 @@ struct fixture {
 
 UP_FIXTURE_TEST(test000af, fixture)
 {
-	UP_FAIL(__PRETTY_FUNCTION__);
+	cout << __PRETTY_FUNCTION__ << endl;
 }
 
-int main(int, char **)
-{
-	UP_RUN_SHUFFLED(time(0));
-}
+UP_SUITE_END()
+
+UP_MAIN();
