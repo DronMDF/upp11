@@ -158,14 +158,6 @@ public:
 };
 
 struct TestBase {
-	template <typename T>
-	bool isEqual(const std::list<T> &a, const std::list<T> &b) {
-		return std::equal(a.begin(), a.end(), b.begin());
-	}
-	template <typename T>
-	bool isEqual(const std::vector<T> &a, const std::vector<T> &b) {
-		return std::equal(a.begin(), a.end(), b.begin());
-	}
 	bool isEqual(const std::string &a, const std::string &b) {
 		return a == b;
 	}
