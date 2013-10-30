@@ -62,12 +62,39 @@ UP_TEST(isEqualShouldCompareOtherTypes)
 	UP_ASSERT(!base.isEqual("te", "next"));
 	UP_ASSERT(base.isEqual(100, 100));
 	UP_ASSERT(base.isEqual("last", "last"));
+
+	const list<int> lvalue = { 1, 2, 3, 4, 5 };
+	const vector<int> vvalue = { 1, 2, 3, 4, 5 };
+	UP_ASSERT(base.isEqual(lvalue, { 1, 2, 3, 4, 5 }));
+	UP_ASSERT(base.isEqual(vvalue, { 1, 2, 3, 4, 5 }));
+	UP_ASSERT(base.isEqual({ 1, 2, 3, 4, 5 }, lvalue));
+	UP_ASSERT(base.isEqual({ 1, 2, 3, 4, 5 }, vvalue));
+
+	const list<string> lstring = { "one", "two", "free" };
+	const vector<string> vstring = { "one", "two", "free" };
+	UP_ASSERT(base.isEqual(lstring, { "one", "two", "free" }));
+	UP_ASSERT(base.isEqual({ "one", "two", "free" }, vstring));
 }
 
 UP_TEST(AssertEqualShouldCompareOtherTypes)
 {
 	UP_ASSERT_EQUAL(100, 100);
 	UP_ASSERT_EQUAL("last", "last");
+
+	// Как же мне сделать сравнение любых контейнеров?
+//	const list<int> lvalue = { 1, 2, 3, 4, 5 };
+//	const vector<int> vvalue = { 1, 2, 3, 4, 5 };
+//	UP_ASSERT_EQUAL(lvalue, lvalue);
+//	UP_ASSERT_EQUAL(vvalue, vvalue);
+//	UP_ASSERT_EQUAL(lvalue, { 1, 2, 3, 4, 5 });
+//	UP_ASSERT(base.isEqual(vvalue, { 1, 2, 3, 4, 5 }));
+//	UP_ASSERT(base.isEqual({ 1, 2, 3, 4, 5 }, lvalue));
+//	UP_ASSERT(base.isEqual({ 1, 2, 3, 4, 5 }, vvalue));
+
+//	const list<string> lstring = { "one", "two", "free" };
+//	const vector<string> vstring = { "one", "two", "free" };
+//	UP_ASSERT(base.isEqual(lstring, { "one", "two", "free" }));
+//	UP_ASSERT(base.isEqual({ "one", "two", "free" }, vstring));
 }
 
 UP_TEST(AssertNeShouldCompareOtherTypes)

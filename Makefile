@@ -17,7 +17,7 @@ check: testupp test000 test001 test002
 
 
 testupp: test/testupp.cpp upp11.h
-	gcc -std=c++11 -o testupp -I. test/testupp.cpp -lstdc++
+	gcc -std=c++11 -ggdb3 -O0 -o testupp -I. test/testupp.cpp -lstdc++
 
 test000: test/test000a.cpp test/test000b.cpp upp11.h
 	gcc -std=c++11 -o test000 -I. test/test000a.cpp test/test000b.cpp -lstdc++
