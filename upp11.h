@@ -5,8 +5,10 @@
 #include <chrono>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <memory>
+#include <sstream>
 #include <vector>
 #include <getopt.h>
 
@@ -157,17 +159,62 @@ public:
 	}
 };
 
+template <typename T>
+struct TestContainer {
+private:
+	std::vector<T> value;
+public:
+	TestContainer(const std::initializer_list<T> &iv) : value(iv.begin(), iv.end()) {}
+	TestContainer(const std::vector<T> &iv) : value(iv) {}
+	TestContainer(const std::list<T> &iv) : value(iv.begin(), iv.end()) {}
+	template<std::size_t sz> TestContainer(const std::array<T, sz> &iv)
+		: value(iv.begin(), iv.end()) {}
+	template<std::size_t sz> TestContainer(T (&iv)[sz]) : value(iv, iv + sz) {}
+
+	bool operator == (const TestContainer<T> &b) const {
+		return value == b.value;
+	}
+	std::string str() const {
+		std::ostringstream os;
+		os << "{";
+		std::copy(value.begin(), value.end(), std::ostream_iterator<T>(os, ", "));
+		os << "}";
+		return os.str();
+	}
+};
+
 struct TestBase {
-	bool isEqual(const std::string &a, const std::string &b) {
+	bool isEqual(const std::string &a, const std::string &b) const {
 		return a == b;
 	}
 	template <typename T>
-	bool isEqual(const T &a, const T &b) {
+	bool isEqual(const TestContainer<T> &a, const TestContainer<T> &b) const {
+		return a == b;
+	}
+	template <typename T>
+	bool isEqual(const T &a, const T &b) const {
 		return a == b;
 	}
 	template <typename A, typename B>
-	bool isEqual(const A &, const B &) {
+	bool isEqual(const A &, const B &) const {
 		return false;
+	}
+
+	template <typename T>
+	std::string asPrintable(const TestContainer<const T> &a, const TestContainer<const T> &b) const {
+		std::ostringstream os;
+		os << a.str() << std::endl << "\t" << b.str();
+		return os.str();
+	}
+	template <typename T>
+	std::string asPrintable(const T &a, const T &b) const {
+		std::ostringstream os;
+		os << a << "vs" << b;
+		return os.str();
+	}
+	template <typename A, typename B>
+	std::string asPrintable(const A &a, const B &b) const {
+		return "? vs ?";
 	}
 };
 
@@ -242,16 +289,16 @@ if (!(expr)) { \
 	throw TestException(); \
 }
 
-#define UP_ASSERT_EQUAL(A, B) \
-if (!isEqual((A), (B))) { \
-	std::cout << __FILE__ "(" << __LINE__ << "): check " #A " == " #B " failed" << std::endl; \
-	std::cout << "\t" << (A) << " != " << (B) << std::endl; \
+#define UP_ASSERT_EQUAL(...) \
+if (!isEqual(__VA_ARGS__)) { \
+	std::cout << __FILE__ "(" << __LINE__ << "): check equal (" #__VA_ARGS__ ") failed" << std::endl; \
+	std::cout << "\t" << asPrintable(__VA_ARGS__) << std::endl; \
 	throw TestException(); \
 }
 
-#define UP_ASSERT_NE(A, B) \
-if (isEqual((A), (B))) { \
-	std::cout << __FILE__ "(" << __LINE__ << "): check " #A " != " #B " failed" << std::endl; \
-	std::cout << "\t" << (A) << " == " << (B) << std::endl; \
+#define UP_ASSERT_NE(...) \
+if (isEqual(__VA_ARGS__)) { \
+	std::cout << __FILE__ "(" << __LINE__ << "): check not equal (" #__VA_ARGS__ ") failed" << std::endl; \
+	std::cout << "\t" << asPrintable(__VA_ARGS__) << std::endl; \
 	throw TestException(); \
 }

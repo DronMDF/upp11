@@ -54,6 +54,18 @@ UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteTestBase)
 
+UP_TEST(TestContainerStringize)
+{
+	const initializer_list<int> ivalue = { 1, 2, 3, 4, 5 };
+	TestContainer<int> ic(ivalue);
+	UP_ASSERT_EQUAL(ic.str(), "{ 1, 2, 3, 4, 5 }");
+
+//	const array<int, 5> avalue = { 1, 2, 3, 4, 5 };
+//	const list<int> lvalue = { 1, 2, 3, 4, 5 };
+//	const vector<int> vvalue = { 1, 2, 3, 4, 5 };
+//	const int rvalue[] = { 1, 2, 3, 4, 5 };
+}
+
 UP_TEST(isEqualShouldCompareOtherTypes)
 {
 	TestBase base;
@@ -76,16 +88,18 @@ UP_TEST(isEqualShouldCompareOtherTypes)
 	UP_ASSERT(base.isEqual({ "one", "two", "free" }, vstring));
 }
 
-UP_TEST(AssertEqualShouldCompareOtherTypes)
+UP_TEST(AssertEqualShouldCompareAnyTypes)
 {
 	UP_ASSERT_EQUAL(100, 100);
 	UP_ASSERT_EQUAL("last", "last");
 
 	// Как же мне сделать сравнение любых контейнеров?
+//	const auto ivalue = { 1, 2, 3, 4, 5 };
 //	const list<int> lvalue = { 1, 2, 3, 4, 5 };
 //	const vector<int> vvalue = { 1, 2, 3, 4, 5 };
 //	UP_ASSERT_EQUAL(lvalue, lvalue);
 //	UP_ASSERT_EQUAL(vvalue, vvalue);
+//	UP_ASSERT_EQUAL(lvalue, ivalue);
 //	UP_ASSERT_EQUAL(lvalue, { 1, 2, 3, 4, 5 });
 //	UP_ASSERT(base.isEqual(vvalue, { 1, 2, 3, 4, 5 }));
 //	UP_ASSERT(base.isEqual({ 1, 2, 3, 4, 5 }, lvalue));
@@ -97,7 +111,7 @@ UP_TEST(AssertEqualShouldCompareOtherTypes)
 //	UP_ASSERT(base.isEqual({ "one", "two", "free" }, vstring));
 }
 
-UP_TEST(AssertNeShouldCompareOtherTypes)
+UP_TEST(AssertNeShouldCompareAnyTypes)
 {
 	UP_ASSERT_NE(1, 0);
 	UP_ASSERT_NE(0, "null");
