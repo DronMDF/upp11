@@ -160,61 +160,82 @@ public:
 };
 
 template <typename T>
-struct TestContainer {
-private:
-	std::vector<T> value;
-public:
-	TestContainer(const std::initializer_list<T> &iv) : value(iv.begin(), iv.end()) {}
-	TestContainer(const std::vector<T> &iv) : value(iv) {}
-	TestContainer(const std::list<T> &iv) : value(iv.begin(), iv.end()) {}
-	template<std::size_t sz> TestContainer(const std::array<T, sz> &iv)
-		: value(iv.begin(), iv.end()) {}
-	template<std::size_t sz> TestContainer(T (&iv)[sz]) : value(iv, iv + sz) {}
+struct TestValue {
+	const std::vector<T> value;
+	const bool agregate;
 
-	bool operator == (const TestContainer<T> &b) const {
-		return value == b.value;
-	}
-	std::string str() const {
-		std::ostringstream os;
-		os << "{";
-		std::copy(value.begin(), value.end(), std::ostream_iterator<T>(os, ", "));
-		os << "}";
-		return os.str();
+	TestValue(const std::initializer_list<T> &iv)
+		: value(iv.begin(), iv.end()), agregate(true) {}
+	TestValue(const std::vector<T> &iv)
+		: value(iv), agregate(true) {}
+	TestValue(const std::list<T> &iv)
+		: value(iv.begin(), iv.end()), agregate(true) {}
+	template<std::size_t sz> TestValue(const std::array<T, sz> &iv)
+		: value(iv.begin(), iv.end()), agregate(true) {}
+	template<std::size_t sz> TestValue(T (&iv)[sz])
+		: value(iv, iv + sz), agregate(true) {}
+	TestValue(const T &iv)
+		: value(1, iv), agregate(false) {}
+
+	bool operator == (const TestValue<T> &b) const {
+		return value == b.value && agregate == b.agregate;
 	}
 };
 
+template <>
+struct TestValue<const char *> {
+	const std::vector<std::string> value;
+	const bool agregate;
+
+	TestValue(const std::initializer_list<const char *> &iv)
+		: value(iv.begin(), iv.end()), agregate(true) {}
+//	TestValue(const std::vector<const char *> &iv)
+//		: value(iv.begin(), iv.end()), agregate(true) {}
+//	TestValue(const std::list<const char *> &iv)
+//		: value(iv.begin(), iv.end()), agregate(true) {}
+//	template<std::size_t sz> TestValue(const std::array<const char *, sz> &iv)
+//		: value(iv.begin(), iv.end()), agregate(true) {}
+//	template<std::size_t sz> TestValue(const char (*iv)[sz])
+//		: value(iv, iv + sz), agregate(true) {}
+//	template<std::size_t sz> TestValue(const char (&iv)[sz])
+//		: value(1, &iv), agregate(false) {}
+	TestValue(const char *iv)
+		: value(1, iv), agregate(false) {}
+
+	bool operator == (const TestValue<std::string> &b) const {
+		return value == b.value && agregate == b.agregate;
+	}
+	bool operator == (const TestValue<const char *> &b) const {
+		return value == b.value && agregate == b.agregate;
+	}
+};
+
+template <typename T>
+std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
+{
+	if (t.aggregate) { os << "{ "; }
+	std::copy(t.value.begin(), t.value.end(), std::ostream_iterator<T>(os, ", "));
+	if (t.aggregate) { os << " }"; }
+	return os;
+}
+
 struct TestBase {
-	bool isEqual(const std::string &a, const std::string &b) const {
-		return a == b;
-	}
 	template <typename T>
-	bool isEqual(const TestContainer<T> &a, const TestContainer<T> &b) const {
-		return a == b;
-	}
-	template <typename T>
-	bool isEqual(const T &a, const T &b) const {
+	bool isEqual(const TestValue<T> &a, const TestValue<T> &b) const {
 		return a == b;
 	}
 	template <typename A, typename B>
-	bool isEqual(const A &, const B &) const {
-		return false;
+	bool isEqual(const TestValue<A> &a, const TestValue<B> &b) const {
+		return a == b;
 	}
 
 	template <typename T>
-	std::string asPrintable(const TestContainer<const T> &a, const TestContainer<const T> &b) const {
+	std::string asPrintable(const TestValue<T> &a, const TestValue<T> &b) const {
 		std::ostringstream os;
-		os << a.str() << std::endl << "\t" << b.str();
+		os << a.str();
+		if (a.aggregate || b.aggregate) { os << std::endl << "\t"; } else { os << " vs "; }
+		os << b.str();
 		return os.str();
-	}
-	template <typename T>
-	std::string asPrintable(const T &a, const T &b) const {
-		std::ostringstream os;
-		os << a << "vs" << b;
-		return os.str();
-	}
-	template <typename A, typename B>
-	std::string asPrintable(const A &a, const B &b) const {
-		return "? vs ?";
 	}
 };
 

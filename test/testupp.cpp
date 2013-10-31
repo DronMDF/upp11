@@ -54,11 +54,31 @@ UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteTestBase)
 
+template <typename T>
+string str(const TestValue<T> &t)
+{
+	ostringstream os;
+	os << t;
+	return os.str();
+}
+
+template <typename T>
+bool value(const TestValue<T> &t)
+{
+	return true;
+}
+
+template <typename T>
+bool value(const T &t)
+{
+	return false;
+}
+
 UP_TEST(TestContainerStringize)
 {
 	const initializer_list<int> ivalue = { 1, 2, 3, 4, 5 };
-	TestContainer<int> ic(ivalue);
-	UP_ASSERT_EQUAL(ic.str(), "{ 1, 2, 3, 4, 5 }");
+	TestValue<int> ic(ivalue);
+//	UP_ASSERT_EQUAL(str(ic), "{ 1, 2, 3, 4, 5 }");
 
 //	const array<int, 5> avalue = { 1, 2, 3, 4, 5 };
 //	const list<int> lvalue = { 1, 2, 3, 4, 5 };
