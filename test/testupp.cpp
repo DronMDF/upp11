@@ -57,9 +57,9 @@ UP_SUITE_BEGIN(suiteTestBase)
 UP_TEST(isEqualShouldCompareOtherTypes)
 {
 	TestBase base;
-//	UP_ASSERT(!base.isEqual(1, 0));
-//	UP_ASSERT(!base.isEqual(1, "0"));
-//	UP_ASSERT(!base.isEqual("te", "next"));
+	UP_ASSERT(!base.isEqual(1, 0));
+	UP_ASSERT(!base.isEqual(1, "0"));
+	UP_ASSERT(!base.isEqual("te", "next"));
 	UP_ASSERT(base.isEqual(100, 100));
 	UP_ASSERT(base.isEqual("last", "last"));
 
@@ -78,7 +78,6 @@ UP_TEST(AssertEqualShouldCompareAnyTypes)
 	UP_ASSERT_EQUAL("last", "last");
 	UP_ASSERT_EQUAL(string("last"), "last");
 
-	// Как же мне сделать сравнение любых контейнеров?
 	const auto cvalue = { 1, 2, 3, 4, 5 };
 	const initializer_list<int> ivalue = { 1, 2, 3, 4, 5 };
 	const list<int> lvalue = { 1, 2, 3, 4, 5 };
@@ -100,8 +99,9 @@ UP_TEST(AssertEqualShouldCompareAnyTypes)
 UP_TEST(AssertNeShouldCompareAnyTypes)
 {
 	UP_ASSERT_NE(1, 0);
-	//UP_ASSERT_NE(0, "null");
+	UP_ASSERT_NE(0, "null");
 	UP_ASSERT_NE("te", "next");
+	UP_ASSERT_NE(-1, numeric_limits<unsigned>::max());
 }
 
 UP_SUITE_END()

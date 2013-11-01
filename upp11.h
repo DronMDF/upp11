@@ -212,12 +212,21 @@ class TestBase {
 	TestValue<std::string> createTestValue(const char *t) const {
 		return TestValue<std::string>(t);
 	}
+
+	template <typename A, typename B>
+	bool isEqualValue(const A &, const B &) const {
+		return false;
+	}
+	template <typename T>
+	bool isEqualValue(const TestValue<T> &ta, const TestValue<T> &tb) const {
+		return ta.agregate == tb.agregate && ta.value == tb.value;
+	}
 public:
 	template <typename A, typename B>
 	bool isEqual(const A &a, const B &b) const {
 		const auto ta = createTestValue(a);
 		const auto tb = createTestValue(b);
-		return ta.agregate == tb.agregate && ta.value == tb.value;
+		return isEqualValue(ta, tb);
 	}
 
 	template <typename A, typename B>
