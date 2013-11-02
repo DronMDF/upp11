@@ -110,8 +110,11 @@ UP_SUITE_BEGIN(suiteExceptions)
 
 UP_TEST(AssertShouldCheckExceptionsByMessage)
 {
-	UP_ASSERT_EXCEPTION("exception message", []{
+	UP_ASSERT_EXCEPTION(runtime_error, "exception message", []{
 		throw runtime_error("exception message");
+	});
+	UP_ASSERT_EXCEPTION(logic_error, []{
+		throw logic_error("");
 	});
 }
 

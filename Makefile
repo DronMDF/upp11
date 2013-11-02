@@ -11,9 +11,9 @@ check: testupp test000 test001 test002
 	@diff -du test001.actual test/test001.expected
 	@echo test001 SUCCESS
 
-	@./test002 -s 0 > test002.actual
+	-@./test002 -s 0 > test002.actual
 	@diff -du test002.actual test/test002.expected
-	@echo test002 SUCCESS
+	@echo Check test failures SUCCESS
 
 
 testupp: test/testupp.cpp upp11.h

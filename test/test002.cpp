@@ -2,15 +2,47 @@
 
 using namespace std;
 
-UP_TEST(test002a)
+UP_SUITE_BEGIN(suiteAssertExceptionWithMessage)
+
+UP_TEST(ShouldFailByType)
 {
+	UP_ASSERT_EXCEPTION(int, "hello", []{
+		throw runtime_error("goodby");
+	});
 }
 
-UP_TEST(test002b)
+UP_TEST(ShouldFailByNoThrow)
 {
+	UP_ASSERT_EXCEPTION(runtime_error, "hello", []{
+		// no throw
+	});
 }
 
-int main(int, char **)
+UP_TEST(ShouldFailByNotEqualMessage)
 {
-	UP_RUN();
+	UP_ASSERT_EXCEPTION(exception, "message", []{
+		throw runtime_error("another message");
+	});
 }
+
+UP_SUITE_END()
+
+UP_SUITE_BEGIN(suiteAssertException)
+
+UP_TEST(ShouldFailByType)
+{
+	UP_ASSERT_EXCEPTION(int, []{
+		throw runtime_error("goodby");
+	});
+}
+
+UP_TEST(ShouldFailByNoThrow)
+{
+	UP_ASSERT_EXCEPTION(runtime_error, []{
+		// no throw
+	});
+}
+
+UP_SUITE_END()
+
+UP_MAIN()

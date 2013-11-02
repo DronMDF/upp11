@@ -239,23 +239,53 @@ public:
 	}
 };
 
-struct TestExceptionInvoker {
-	TestExceptionInvoker(const std::string &file, int line, const std::string &message,
-			const std::function<void ()> &f)
-	{
+template <typename E>
+struct TestExceptionChecker {
+	const std::string file;
+	const int line;
+	const std::string extype;
+
+	TestExceptionChecker(const std::string &file, int line, const std::string &extype)
+		: file(file), line(line), extype(extype) {}
+
+	void check(const std::function<void ()> &f) {
 		try {
 			f();
-		} catch (const std::exception &e) {
-			if (e.what() == message) { return; }
-			std::cout << file << "(" << line << "): check exception ("
-				  << message << ") failed" << std::endl;
-			std::cout << "\tcatched exception: " << e.what() << std::endl;
-			throw upp11::TestException();
+		} catch (const E &e) {
+			return;
 		}
-		std::cout << file << "(" << line << "): expected exception ("
-			<< message << ") not throw" << std::endl;
+		std::cout << file << "(" << line << "): expected exception "
+			<< extype << " not throw" << std::endl;
 		throw upp11::TestException();
 	}
+
+	void check(const std::string &message, const std::function<void ()> &f) {
+		if (!std::is_convertible<E, std::exception>::value) {
+			std::cout << file << "(" << line << "): expected exception "
+				<< extype << " is not child of std::exception" << std::endl;
+			throw upp11::TestException();
+		}
+		try {
+			try {
+				f();
+				std::cout << file << "(" << line << "): expected exception "
+					<< extype << "(\"" << message << "\") not throw" << std::endl;
+				throw upp11::TestException();
+			} catch (const E &) {
+				throw;
+			}
+		} catch (const std::exception &e) {
+			if (e.what() != message) {
+				std::cout << file << "(" << line << "): check exception "
+					<< extype << "(\"" << message << "\") failed" << std::endl;
+				std::cout << "\tcatched exception: \"" << e.what() << "\"" << std::endl;
+				throw upp11::TestException();
+			}
+		}
+	}
+};
+
+struct TestExceptionMessage {
 };
 
 class TestMain {
@@ -343,5 +373,5 @@ if (isEqual(__VA_ARGS__)) { \
 	throw TestException(); \
 }
 
-#define UP_ASSERT_EXCEPTION(message, ...) \
-TestExceptionInvoker(__FILE__, __LINE__, message, __VA_ARGS__)
+#define UP_ASSERT_EXCEPTION(extype, ...) \
+upp11::TestExceptionChecker<extype>(__FILE__, __LINE__, #extype).check(__VA_ARGS__)
