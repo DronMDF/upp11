@@ -239,6 +239,25 @@ public:
 	}
 };
 
+struct TestExceptionInvoker {
+	TestExceptionInvoker(const std::string &file, int line, const std::string &message,
+			const std::function<void ()> &f)
+	{
+		try {
+			f();
+		} catch (const std::exception &e) {
+			if (e.what() == message) { return; }
+			std::cout << file << "(" << line << "): check exception ("
+				  << message << ") failed" << std::endl;
+			std::cout << "\tcatched exception: " << e.what() << std::endl;
+			throw upp11::TestException();
+		}
+		std::cout << file << "(" << line << "): expected exception ("
+			<< message << ") not throw" << std::endl;
+		throw upp11::TestException();
+	}
+};
+
 class TestMain {
 public:
 	int main(int argc, char **argv) {
@@ -323,3 +342,6 @@ if (isEqual(__VA_ARGS__)) { \
 	std::cout << "\t" << asPrintable(__VA_ARGS__) << std::endl; \
 	throw TestException(); \
 }
+
+#define UP_ASSERT_EXCEPTION(message, ...) \
+TestExceptionInvoker(__FILE__, __LINE__, message, __VA_ARGS__)
