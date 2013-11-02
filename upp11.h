@@ -358,21 +358,21 @@ void Test##name::run(const tuple<__VA_ARGS__> &params)
 #define UP_ASSERT(expr) \
 if (!(expr)) { \
 	std::cout << __FILE__ "(" << __LINE__ << "): check " #expr " failed" << std::endl; \
-	throw TestException(); \
+	throw upp11::TestException(); \
 }
 
 #define UP_ASSERT_EQUAL(...) \
 if (!upp11::TestBase().isEqual(__VA_ARGS__)) { \
 	std::cout << __FILE__ "(" << __LINE__ << "): check equal (" #__VA_ARGS__ ") failed" << std::endl; \
 	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
-	throw TestException(); \
+	throw upp11::TestException(); \
 }
 
 #define UP_ASSERT_NE(...) \
 if (upp11::TestBase().isEqual(__VA_ARGS__)) { \
 	std::cout << __FILE__ "(" << __LINE__ << "): check not equal (" #__VA_ARGS__ ") failed" << std::endl; \
 	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
-	throw TestException(); \
+	throw upp11::TestException(); \
 }
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
