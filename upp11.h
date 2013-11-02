@@ -253,6 +253,7 @@ struct TestExceptionChecker {
 			f();
 		} catch (const E &e) {
 			return;
+		} catch (...) {
 		}
 		std::cout << file << "(" << line << "): expected exception "
 			<< extype << " not throw" << std::endl;
@@ -265,27 +266,28 @@ struct TestExceptionChecker {
 				<< extype << " is not child of std::exception" << std::endl;
 			throw upp11::TestException();
 		}
+		bool catched = false;
 		try {
 			try {
 				f();
-				std::cout << file << "(" << line << "): expected exception "
-					<< extype << "(\"" << message << "\") not throw" << std::endl;
-				throw upp11::TestException();
 			} catch (const E &) {
+				catched = true;
 				throw;
 			}
 		} catch (const std::exception &e) {
-			if (e.what() != message) {
+			if (catched) {
+				if (e.what() == message) { return; }
 				std::cout << file << "(" << line << "): check exception "
 					<< extype << "(\"" << message << "\") failed" << std::endl;
 				std::cout << "\tcatched exception: \"" << e.what() << "\"" << std::endl;
 				throw upp11::TestException();
 			}
+		} catch (...) {
 		}
+		std::cout << file << "(" << line << "): expected exception "
+			<< extype << "(\"" << message << "\") not throw" << std::endl;
+		throw upp11::TestException();
 	}
-};
-
-struct TestExceptionMessage {
 };
 
 class TestMain {

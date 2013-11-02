@@ -1,7 +1,9 @@
-test/test002.cpp(43): expected exception runtime_error not throw
+test/test002.cpp(50): expected exception runtime_error not throw
 suiteAssertException/ShouldFailByNoThrow: FAIL
-exception from test run: goodby
+test/test002.cpp(43): expected exception int not throw
 suiteAssertException/ShouldFailByType: FAIL
+test/test002.cpp(32): expected exception overflow_error("message") not throw
+suiteAssertExceptionWithMessage/ShouldFailByChildException: FAIL
 test/test002.cpp(18): expected exception runtime_error("hello") not throw
 suiteAssertExceptionWithMessage/ShouldFailByNoThrow: FAIL
 test/test002.cpp(25): check exception exception("message") failed

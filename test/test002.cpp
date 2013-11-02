@@ -25,6 +25,13 @@ UP_TEST(ShouldFailByNotEqualMessage)
 	});
 }
 
+UP_TEST(ShouldFailByChildException)
+{
+	UP_ASSERT_EXCEPTION(overflow_error, "message", []{
+		throw runtime_error("message");
+	});
+}
+
 UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteAssertException)
