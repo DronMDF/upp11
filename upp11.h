@@ -328,28 +328,28 @@ namespace name { \
 }
 
 #define UP_TEST(name) \
-struct Test##name : private upp11::TestBase { \
+struct Test##name { \
 	void run(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::run()
 
 #define UP_FIXTURE_TEST(name, fixture) \
-struct Test##name : private upp11::TestBase, public fixture { \
+struct Test##name : public fixture { \
 	void run(); \
 }; \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::run()
 
 #define UP_PARAMETRIZED_TEST(name, params, ...) \
-struct Test##name : private upp11::TestBase { \
+struct Test##name { \
 	void run(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
 void Test##name::run(const tuple<__VA_ARGS__> &params)
 
 #define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
-struct Test##name : private upp11::TestBase, public fixture { \
+struct Test##name : public fixture { \
 	void run(const tuple<__VA_ARGS__> &params); \
 }; \
 static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
@@ -362,16 +362,16 @@ if (!(expr)) { \
 }
 
 #define UP_ASSERT_EQUAL(...) \
-if (!isEqual(__VA_ARGS__)) { \
+if (!upp11::TestBase().isEqual(__VA_ARGS__)) { \
 	std::cout << __FILE__ "(" << __LINE__ << "): check equal (" #__VA_ARGS__ ") failed" << std::endl; \
-	std::cout << "\t" << asPrintable(__VA_ARGS__) << std::endl; \
+	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
 	throw TestException(); \
 }
 
 #define UP_ASSERT_NE(...) \
-if (isEqual(__VA_ARGS__)) { \
+if (upp11::TestBase().isEqual(__VA_ARGS__)) { \
 	std::cout << __FILE__ "(" << __LINE__ << "): check not equal (" #__VA_ARGS__ ") failed" << std::endl; \
-	std::cout << "\t" << asPrintable(__VA_ARGS__) << std::endl; \
+	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
 	throw TestException(); \
 }
 

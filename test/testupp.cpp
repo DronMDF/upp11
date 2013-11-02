@@ -72,6 +72,11 @@ UP_TEST(isEqualShouldCompareOtherTypes)
 	UP_ASSERT(base.isEqual(lstring, vstring));
 }
 
+void CUSTOM_EQUAL_ASSERTION()
+{
+	UP_ASSERT_EQUAL(-100, -100);
+}
+
 UP_TEST(AssertEqualShouldCompareAnyTypes)
 {
 	UP_ASSERT_EQUAL(100, 100);
@@ -94,6 +99,8 @@ UP_TEST(AssertEqualShouldCompareAnyTypes)
 	const list<string> lstring = { "one", "two", "free" };
 	const vector<string> vstring = { "one", "two", "free" };
 	UP_ASSERT_EQUAL(lstring, vstring);
+
+	CUSTOM_EQUAL_ASSERTION();
 }
 
 UP_TEST(AssertNeShouldCompareAnyTypes)
