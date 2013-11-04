@@ -15,6 +15,4 @@
 *.creator.user
 *.actual
 testupp
-test000
-test001
-test002
+testfailures
