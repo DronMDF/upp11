@@ -19,11 +19,31 @@ To use framework:
 </ol>
 
 ```C++
-UP_TEST(test)
+UP_TEST(test1)
 {
 	// test code
 }
 
+const auto params = {
+	make_tuple(1, "str1"),
+	make_tuple(2, "str222")
+	// etc
+};
+
+UP_PARAMETRIZED_TEST(test2, params, int, const char *)
+{
+	// parametrized test code
+}
+
+struct fixture {
+};
+
+UP_FIXTURE_TEST(test3, fixture)
+{
+	// test code with fixture
+}
+
+// parametrized with fixture available too...
 ```
 
 <ol>
@@ -47,7 +67,6 @@ UP_TEST(test)
 		// code under test here...
 	});
 }
-
 ```
 
 <ol>
