@@ -1,4 +1,81 @@
 upp11
 =====
 
-C++11 lightweight single header unit test framework
+Lightweight C++11 single header unit test framework
+
+To use framework:
+
+<ol>
+<li value=1>Copy upp11.h in you project dir.</li>
+<li value=2>Create unit test source files or modify existing file</li>
+</ol>
+
+```C++
+#include "upp11.h"
+```
+
+<ol>
+<li value=3>Write the tests</li>
+</ol>
+
+```C++
+UP_TEST(test)
+{
+	// test code
+}
+
+```
+
+<ol>
+<li value=4>Using test assertions</li>
+</ol>
+
+```C++
+UP_TEST(test)
+{
+	UP_ASSERT(0 < 1);
+	UP_ASSERT_EQUAL("right", "right");
+	UP_ASSERT_NE(list<int>{1, 2, 3, 4, 5 }, vector<int>{5, 4, 3, 2, 1});
+
+	// check exception by type
+	UP_ASSERT_EXCEPTION(runtime_error, []{
+		// code under test here...
+	});
+
+	// check exception by what
+	UP_ASSERT_EXCEPTION(runtime_error, "exception message", []{
+		// code under test here...
+	});
+}
+
+```
+
+<ol>
+<li value=5>Group tests</li>
+</ol>
+
+```C++
+UP_SUITE_BEGIN(suite_name);
+
+// tests and child suites here
+
+UP_SUITE_END();
+```
+
+<ol>
+<li value=6>Compile and run the test</li>
+</ol>
+
+```C++
+// once for all test source files of test runner
+UP_MAIN();
+```
+
+```shell
+$ runner [-q] [-t] [-s <seed>]
+```
+
+<ol>
+<li value=7>Enjoy</li>
+</ol>
+
