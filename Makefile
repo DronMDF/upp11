@@ -8,8 +8,8 @@ check: testupp testfailures
 	@echo Check test failures SUCCESS
 
 
-testupp: test/testupp.cpp upp11.h
-	gcc -std=c++11 -o testupp -I. test/testupp.cpp -lstdc++
+testupp: test/testupp.cpp test/testuppdetail.cpp upp11.h
+	gcc -std=c++11 -o testupp -I. test/testupp.cpp test/testuppdetail.cpp -lstdc++
 
 testfailures: test/testfailures.cpp upp11.h
 	gcc -std=c++11 -o testfailures -I. test/testfailures.cpp -lstdc++

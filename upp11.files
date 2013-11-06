@@ -1,10 +1,7 @@
 LICENSE
 README.md
-test/test000a.cpp
-test/test000b.cpp
 upp11.h
 Makefile
-test/test002.cpp
-test/test002.cpp
-test/test001.cpp
 test/testupp.cpp
+test/testfailures.cpp
+test/testuppdetail.cpp
