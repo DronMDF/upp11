@@ -142,15 +142,15 @@ public:
 	}
 };
 
-template <typename T, typename ...V>
+template <typename T, typename V>
 class TestInvokerParametrized : public TestInvoker<T> {
 private:
-	bool invoke(const std::tuple<V...> &params) {
+	bool invoke(const V &params) {
 		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
 	}
 public:
 	TestInvokerParametrized(const std::string &name,
-		const std::initializer_list<const std::tuple<V...>> &params)
+				const std::initializer_list<const V> &params)
 	{
 		for (const auto v: params) {
 			TestCollection::addTest(name,
@@ -341,19 +341,21 @@ struct Test##name : public fixture { \
 static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
 void Test##name::run()
 
-#define UP_PARAMETRIZED_TEST(name, params, ...) \
+#define UP_PARAMETRIZED_TEST(name, params) \
 struct Test##name { \
-	void run(const tuple<__VA_ARGS__> &params); \
+	void run(const decltype(params)::value_type &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
-void Test##name::run(const tuple<__VA_ARGS__> &params)
+static upp11::TestInvokerParametrized<Test##name, decltype(params)::value_type> \
+	test##name##invoker(#name, params); \
+void Test##name::run(const decltype(params)::value_type &params)
 
-#define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params, ...) \
+#define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params) \
 struct Test##name : public fixture { \
-	void run(const tuple<__VA_ARGS__> &params); \
+	void run(const decltype(params)::value_type &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, __VA_ARGS__> test##name##invoker(#name, params); \
-void Test##name::run(const tuple<__VA_ARGS__> &params)
+static upp11::TestInvokerParametrized<Test##name, decltype(params)::value_type> \
+	test##name##invoker(#name, params); \
+void Test##name::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(expr) \
 if (!(expr)) { \

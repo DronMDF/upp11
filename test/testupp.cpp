@@ -12,7 +12,7 @@ const auto numbers = {
 	make_tuple(9, "9")
 };
 
-UP_PARAMETRIZED_TEST(numderShouldConvertToString, numbers, int, const char *)
+UP_PARAMETRIZED_TEST(numderShouldConvertToString, numbers)
 {
 	const int n = get<0>(numbers);
 	const string ns = get<1>(numbers);
@@ -20,6 +20,50 @@ UP_PARAMETRIZED_TEST(numderShouldConvertToString, numbers, int, const char *)
 	ostringstream s;
 	s << n;
 	UP_ASSERT_EQUAL(s.str(), ns);
+}
+
+const auto lens = {
+	make_pair(1, "1"),
+	make_pair(2, "10"),
+	make_pair(7, "1000000"),
+	make_pair(1, "x")
+};
+
+UP_PARAMETRIZED_TEST(stringLenShouldDetermine, lens)
+{
+	const string::size_type n = lens.first;
+	const string ns = lens.second;
+	UP_ASSERT_EQUAL(n, ns.size());
+}
+
+const auto prime = { 3, 5, 7, 13 };
+
+// Fixture is not only for setUp/tearDown, but for help functions
+struct prime_checker {
+	bool isPrime(int p) {
+		for (int n = 2; n < p; n++) {
+			if (p % n == 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
+UP_FIXTURE_PARAMETRIZED_TEST(numbersShouldBePrime, prime_checker, prime)
+{
+	UP_ASSERT(isPrime(prime));
+}
+
+const auto collect = {
+	list<int>{ 0, 1, 2, 3 },
+	list<int>{ 2, 4 },
+	list<int>{ 6 }
+};
+
+UP_PARAMETRIZED_TEST(collectSumShouldBe6, collect)
+{
+	UP_ASSERT_EQUAL(accumulate(collect.begin(), collect.end(), 0), 6);
 }
 
 UP_SUITE_END()
