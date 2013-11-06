@@ -3,6 +3,27 @@
 
 using namespace std;
 
+UP_SUITE_BEGIN(suiteParametrized)
+
+const auto numbers = {
+	make_tuple(1, "1"),
+	make_tuple(1000000, "1000000"),
+	make_tuple(-1000000, "-1000000"),
+	make_tuple(9, "9")
+};
+
+UP_PARAMETRIZED_TEST(numderShouldConvertToString, numbers, int, const char *)
+{
+	const int n = get<0>(numbers);
+	const string ns = get<1>(numbers);
+
+	ostringstream s;
+	s << n;
+	UP_ASSERT_EQUAL(s.str(), ns);
+}
+
+UP_SUITE_END()
+
 UP_SUITE_BEGIN(suiteEqual)
 
 void CUSTOM_EQUAL_ASSERTION()
