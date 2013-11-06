@@ -142,15 +142,14 @@ public:
 	}
 };
 
-template <typename T, typename V>
+template <typename T, typename C>
 class TestInvokerParametrized : public TestInvoker<T> {
 private:
-	bool invoke(const V &params) {
+	bool invoke(const typename C::value_type &params) {
 		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
 	}
 public:
-	TestInvokerParametrized(const std::string &name,
-				const std::initializer_list<const V> &params)
+	TestInvokerParametrized(const std::string &name, const C &params)
 	{
 		for (const auto v: params) {
 			TestCollection::addTest(name,
@@ -345,7 +344,7 @@ void Test##name::run()
 struct Test##name { \
 	void run(const decltype(params)::value_type &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, decltype(params)::value_type> \
+static upp11::TestInvokerParametrized<Test##name, decltype(params)> \
 	test##name##invoker(#name, params); \
 void Test##name::run(const decltype(params)::value_type &params)
 
@@ -353,7 +352,7 @@ void Test##name::run(const decltype(params)::value_type &params)
 struct Test##name : public fixture { \
 	void run(const decltype(params)::value_type &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, decltype(params)::value_type> \
+static upp11::TestInvokerParametrized<Test##name, decltype(params)> \
 	test##name##invoker(#name, params); \
 void Test##name::run(const decltype(params)::value_type &params)
 
