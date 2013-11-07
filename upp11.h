@@ -325,35 +325,35 @@ namespace name { \
 	static upp11::TestSuiteEnd suite_end; \
 }
 
-#define UP_TEST(name) \
-struct Test##name { \
+#define UP_TEST(testname) \
+struct testname { \
 	void run(); \
 }; \
-static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
-void Test##name::run()
+static upp11::TestInvokerTrivial<testname> testname##_invoker(#testname); \
+void testname::run()
 
-#define UP_FIXTURE_TEST(name, fixture) \
-struct Test##name : public fixture { \
+#define UP_FIXTURE_TEST(testname, fixture) \
+struct testname : public fixture { \
 	void run(); \
 }; \
-static upp11::TestInvokerTrivial<Test##name> test##name##invoker(#name); \
-void Test##name::run()
+static upp11::TestInvokerTrivial<testname> testname##_invoker(#testname); \
+void testname::run()
 
-#define UP_PARAMETRIZED_TEST(name, params) \
-struct Test##name { \
+#define UP_PARAMETRIZED_TEST(testname, params) \
+struct testname { \
 	void run(const decltype(params)::value_type &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, decltype(params)> \
-	test##name##invoker(#name, params); \
-void Test##name::run(const decltype(params)::value_type &params)
+static upp11::TestInvokerParametrized<testname, decltype(params)> \
+	testname##_invoker(#testname, params); \
+void testname::run(const decltype(params)::value_type &params)
 
-#define UP_FIXTURE_PARAMETRIZED_TEST(name, fixture, params) \
-struct Test##name : public fixture { \
+#define UP_FIXTURE_PARAMETRIZED_TEST(testname, fixture, params) \
+struct testname : public fixture { \
 	void run(const decltype(params)::value_type &params); \
 }; \
-static upp11::TestInvokerParametrized<Test##name, decltype(params)> \
-	test##name##invoker(#name, params); \
-void Test##name::run(const decltype(params)::value_type &params)
+static upp11::TestInvokerParametrized<testname, decltype(params)> \
+	testname##_invoker(#testname, params); \
+void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(expr) \
 if (!(expr)) { \
