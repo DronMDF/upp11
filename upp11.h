@@ -26,43 +26,35 @@ public:
 		return collection;
 	}
 
-	void beginSuite(const std::string &name)
-	{
-		TestCollection &collection = getInstance();
-		collection.suites.push_back(name);
+	void beginSuite(const std::string &name) {
+		suites.push_back(name);
 	}
 
-	void endSuite()
-	{
-		TestCollection &collection = getInstance();
-		collection.suites.pop_back();
+	void endSuite() {
+		suites.pop_back();
 	}
 
-	void addTest(const std::string &name, std::function<bool ()> test)
-	{
-		TestCollection &collection = getInstance();
+	void addTest(const std::string &name, std::function<bool ()> test) {
 		std::string path;
-		for (auto s: collection.suites) {
+		for (auto s: suites) {
 			path += s + "/";
 		}
-		collection.tests.push_back(std::make_pair(path + name, test));
+		tests.push_back(std::make_pair(path + name, test));
 	}
 
-	bool runAllTests(unsigned seed, bool quiet, bool timestamp) const
-	{
-		TestCollection &collection = getInstance();
+	bool runAllTests(unsigned seed, bool quiet, bool timestamp) {
 		// Отсортируем все по именам, чтобы не зависело от порядка линковки
-		std::sort(collection.tests.begin(), collection.tests.end(),
+		std::sort(tests.begin(), tests.end(),
 			[](const test_pair_t &A, const test_pair_t &B){ return A.first < B.first; });
 		if (seed != 0) {
 			if (!quiet) {
 				std::cout << "random seed: " << seed << std::endl;
 			}
 			std::default_random_engine r(seed);
-			std::shuffle(collection.tests.begin(), collection.tests.end(), r);
+			std::shuffle(tests.begin(), tests.end(), r);
 		}
 		bool failure = false;
-		for (auto t: collection.tests) {
+		for (auto t: tests) {
 			using namespace std::chrono;
 			const high_resolution_clock::time_point st = high_resolution_clock::now();
 			const bool success = t.second();
