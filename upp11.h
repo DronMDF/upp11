@@ -20,25 +20,25 @@ private:
 	std::vector<test_pair_t> tests;
 	std::vector<std::string> suites;
 
+public:
 	static TestCollection &getInstance() {
 		static TestCollection collection;
 		return collection;
-	};
+	}
 
-public:
-	static void beginSuite(const std::string &name)
+	void beginSuite(const std::string &name)
 	{
 		TestCollection &collection = getInstance();
 		collection.suites.push_back(name);
 	}
 
-	static void endSuite()
+	void endSuite()
 	{
 		TestCollection &collection = getInstance();
 		collection.suites.pop_back();
 	}
 
-	static void addTest(const std::string &name, std::function<bool ()> test)
+	void addTest(const std::string &name, std::function<bool ()> test)
 	{
 		TestCollection &collection = getInstance();
 		std::string path;
@@ -48,7 +48,7 @@ public:
 		collection.tests.push_back(std::make_pair(path + name, test));
 	}
 
-	static bool runAllTests(unsigned seed, bool quiet, bool timestamp)
+	bool runAllTests(unsigned seed, bool quiet, bool timestamp) const
 	{
 		TestCollection &collection = getInstance();
 		// Отсортируем все по именам, чтобы не зависело от порядка линковки
@@ -84,14 +84,14 @@ public:
 class TestSuiteBegin {
 public:
 	TestSuiteBegin(const std::string &name) {
-		TestCollection::beginSuite(name);
+		TestCollection::getInstance().beginSuite(name);
 	}
 };
 
 class TestSuiteEnd {
 public:
 	TestSuiteEnd() {
-		TestCollection::endSuite();
+		TestCollection::getInstance().endSuite();
 	}
 };
 
@@ -138,7 +138,8 @@ private:
 	}
 public:
 	TestInvokerTrivial(const std::string &name) {
-		TestCollection::addTest(name, std::bind(&TestInvokerTrivial::invoke, this));
+		TestCollection::getInstance().addTest(name,
+			std::bind(&TestInvokerTrivial::invoke, this));
 	}
 };
 
@@ -152,7 +153,7 @@ public:
 	TestInvokerParametrized(const std::string &name, const C &params)
 	{
 		for (const auto v: params) {
-			TestCollection::addTest(name,
+			TestCollection::getInstance().addTest(name,
 				std::bind(&TestInvokerParametrized::invoke, this, v));
 		}
 	}
@@ -302,7 +303,7 @@ public:
 			if (opt == 't') { timestamp = true; }
 			if (opt == 's') { seed = std::atoi(optarg); }
 		};
-		return TestCollection::runAllTests(seed, quiet, timestamp) ? 0 : -1;
+		return TestCollection::getInstance().runAllTests(seed, quiet, timestamp) ? 0 : -1;
 	}
 };
 
@@ -314,9 +315,7 @@ int main(int argc, char **argv) { \
 }
 
 #define UP_RUN() \
-upp11::TestCollection::runAllTests(0, false, false)
-#define UP_RUN_SHUFFLED(seed) \
-upp11::TestCollection::runAllTests(seed, false, false)
+upp11::TestCollection::getInstance().runAllTests(0, false, false)
 
 #define UP_SUITE_BEGIN(name) \
 namespace name { \
