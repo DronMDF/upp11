@@ -24,14 +24,17 @@ UP_TEST(test1)
 	// test code
 }
 
+// tuple - for example. Any type possible, but params should be monotypes.
 const auto params = {
 	make_tuple(1, "str1"),
 	make_tuple(2, "str222")
 	// etc
 };
 
-UP_PARAMETRIZED_TEST(test2, params, int, const char *)
+UP_PARAMETRIZED_TEST(test2, params)
 {
+	const auto i = get<0>(params);
+	const auto s = get<1>(params);
 	// parametrized test code
 }
 
