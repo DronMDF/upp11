@@ -233,12 +233,11 @@ public:
 
 template <typename E>
 struct TestExceptionChecker {
-	const std::string file;
-	const int line;
+	const std::string location;
 	const std::string extype;
 
-	TestExceptionChecker(const std::string &file, int line, const std::string &extype)
-		: file(file), line(line), extype(extype) {}
+	TestExceptionChecker(const std::string &location, const std::string &extype)
+		: location(location), extype(extype) {}
 
 	void check(const std::function<void ()> &f) {
 		try {
@@ -247,14 +246,14 @@ struct TestExceptionChecker {
 			return;
 		} catch (...) {
 		}
-		std::cout << file << "(" << line << "): expected exception "
+		std::cout << location << ": expected exception "
 			<< extype << " not throw" << std::endl;
 		throw upp11::TestException();
 	}
 
 	void check(const std::string &message, const std::function<void ()> &f) {
 		if (!std::is_convertible<E, std::exception>::value) {
-			std::cout << file << "(" << line << "): expected exception "
+			std::cout << location << ": expected exception "
 				<< extype << " is not child of std::exception" << std::endl;
 			throw upp11::TestException();
 		}
@@ -269,14 +268,14 @@ struct TestExceptionChecker {
 		} catch (const std::exception &e) {
 			if (catched) {
 				if (e.what() == message) { return; }
-				std::cout << file << "(" << line << "): check exception "
+				std::cout << location << ": check exception "
 					<< extype << "(\"" << message << "\") failed" << std::endl;
 				std::cout << "\tcatched exception: \"" << e.what() << "\"" << std::endl;
 				throw upp11::TestException();
 			}
 		} catch (...) {
 		}
-		std::cout << file << "(" << line << "): expected exception "
+		std::cout << location << ": expected exception "
 			<< extype << "(\"" << message << "\") not throw" << std::endl;
 		throw upp11::TestException();
 	}
@@ -300,6 +299,10 @@ public:
 };
 
 } // end of namespace upp11
+
+#define T_(x) #x
+#define T(x) T_(x)
+#define LOCATION __FILE__ "(" T(__LINE__) ")"
 
 #define UP_MAIN() \
 int main(int argc, char **argv) { \
@@ -355,17 +358,17 @@ if (!(expr)) { \
 
 #define UP_ASSERT_EQUAL(...) \
 if (!upp11::TestBase().isEqual(__VA_ARGS__)) { \
-	std::cout << __FILE__ "(" << __LINE__ << "): check equal (" #__VA_ARGS__ ") failed" << std::endl; \
+	std::cout << LOCATION ": check equal (" #__VA_ARGS__ ") failed" << std::endl; \
 	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
 	throw upp11::TestException(); \
 }
 
 #define UP_ASSERT_NE(...) \
 if (upp11::TestBase().isEqual(__VA_ARGS__)) { \
-	std::cout << __FILE__ "(" << __LINE__ << "): check not equal (" #__VA_ARGS__ ") failed" << std::endl; \
+	std::cout << LOCATION ": check not equal (" #__VA_ARGS__ ") failed" << std::endl; \
 	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
 	throw upp11::TestException(); \
 }
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
-upp11::TestExceptionChecker<extype>(__FILE__, __LINE__, #extype).check(__VA_ARGS__)
+upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)
