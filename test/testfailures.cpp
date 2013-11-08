@@ -2,6 +2,24 @@
 
 using namespace std;
 
+UP_SUITE_BEGIN(suiteAssertEqual)
+
+UP_TEST(ShouldFailByNoEqual)
+{
+	UP_ASSERT_EQUAL(1, 0);
+}
+
+UP_SUITE_END()
+
+UP_SUITE_BEGIN(suiteAssertNe)
+
+UP_TEST(ShouldFailByEqual)
+{
+	UP_ASSERT_NE(1, 1);
+}
+
+UP_SUITE_END()
+
 UP_SUITE_BEGIN(suiteAssertExceptionWithMessage)
 
 UP_TEST(ShouldFailByType)

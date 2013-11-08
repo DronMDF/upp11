@@ -229,6 +229,24 @@ public:
 		os << ta << " vs " << tb;
 		return os.str();
 	}
+
+	template <typename A, typename B>
+	void assertEqual(const A &a, const B &b, const std::string &location, const std::string &expression) const
+	{
+		if (isEqual(a, b)) { return; }
+		std::cout << location << ": check equal (" << expression << ") failed" << std::endl;
+		std::cout << "\t" << asPrintable(a, b) << std::endl;
+		throw TestException();
+	}
+
+	template <typename A, typename B>
+	void assertNe(const A &a, const B &b, const std::string &location, const std::string &expression) const
+	{
+		if (!isEqual(a, b)) { return; }
+		std::cout << location << ": check not equal (" << expression << ") failed" << std::endl;
+		std::cout << "\t" << asPrintable(a, b) << std::endl;
+		throw TestException();
+	}
 };
 
 template <typename E>
@@ -352,23 +370,15 @@ void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(expr) \
 if (!(expr)) { \
-	std::cout << __FILE__ "(" << __LINE__ << "): check " #expr " failed" << std::endl; \
+	std::cout << LOCATION ": check " #expr " failed" << std::endl; \
 	throw upp11::TestException(); \
 }
 
 #define UP_ASSERT_EQUAL(...) \
-if (!upp11::TestBase().isEqual(__VA_ARGS__)) { \
-	std::cout << LOCATION ": check equal (" #__VA_ARGS__ ") failed" << std::endl; \
-	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
-	throw upp11::TestException(); \
-}
+upp11::TestBase().assertEqual(__VA_ARGS__, LOCATION, #__VA_ARGS__)
 
 #define UP_ASSERT_NE(...) \
-if (upp11::TestBase().isEqual(__VA_ARGS__)) { \
-	std::cout << LOCATION ": check not equal (" #__VA_ARGS__ ") failed" << std::endl; \
-	std::cout << "\t" << upp11::TestBase().asPrintable(__VA_ARGS__) << std::endl; \
-	throw upp11::TestException(); \
-}
+upp11::TestBase().assertNe(__VA_ARGS__, LOCATION, #__VA_ARGS__)
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
 upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)
