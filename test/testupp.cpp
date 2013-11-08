@@ -1,4 +1,5 @@
 
+#include <map>
 #include <upp11.h>
 
 using namespace std;
@@ -69,6 +70,11 @@ UP_PARAMETRIZED_TEST(collectSumShouldBe6, collect)
 UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteEqual)
+
+UP_TEST(AssertShouldIgnoreComma)
+{
+	UP_ASSERT(map<int, int>().empty());
+}
 
 void CUSTOM_EQUAL_ASSERTION()
 {

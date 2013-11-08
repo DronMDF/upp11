@@ -247,6 +247,13 @@ public:
 		std::cout << "\t" << asPrintable(a, b) << std::endl;
 		throw TestException();
 	}
+
+	void assert(bool expr, const std::string &location, const std::string &expression) const
+	{
+		if (expr) { return; }
+		std::cout << location << ": check " << expression << " failed" << std::endl;
+		throw TestException();
+	}
 };
 
 template <typename E>
@@ -368,11 +375,8 @@ static upp11::TestInvokerParametrized<testname, decltype(params)> \
 	testname##_invoker(#testname, params); \
 void testname::run(const decltype(params)::value_type &params)
 
-#define UP_ASSERT(expr) \
-if (!(expr)) { \
-	std::cout << LOCATION ": check " #expr " failed" << std::endl; \
-	throw upp11::TestException(); \
-}
+#define UP_ASSERT(...) \
+upp11::TestBase().assert(__VA_ARGS__, LOCATION, #__VA_ARGS__)
 
 #define UP_ASSERT_EQUAL(...) \
 upp11::TestBase().assertEqual(__VA_ARGS__, LOCATION, #__VA_ARGS__)
