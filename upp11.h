@@ -173,6 +173,8 @@ std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
 }
 
 class TestBase {
+	const std::string location;
+
 	template <typename T>
 	TestValue<T> createTestValue(const T &t) const {
 		return TestValue<T>(t);
@@ -213,7 +215,7 @@ class TestBase {
 	bool isEqualValue(const TestValue<T> &ta, const TestValue<T> &tb) const {
 		return ta.agregate == tb.agregate && ta.value == tb.value;
 	}
-public:
+
 	template <typename A, typename B>
 	bool isEqual(const A &a, const B &b) const {
 		const auto ta = createTestValue(a);
@@ -230,8 +232,11 @@ public:
 		return os.str();
 	}
 
+public:
+	TestBase(const std::string &location) : location(location) {}
+
 	template <typename A, typename B>
-	void assertEqual(const A &a, const B &b, const std::string &location, const std::string &expression) const
+	void assertEqual(const A &a, const B &b, const std::string &expression) const
 	{
 		if (isEqual(a, b)) { return; }
 		std::cout << location << ": check equal (" << expression << ") failed" << std::endl;
@@ -240,7 +245,7 @@ public:
 	}
 
 	template <typename A, typename B>
-	void assertNe(const A &a, const B &b, const std::string &location, const std::string &expression) const
+	void assertNe(const A &a, const B &b, const std::string &expression) const
 	{
 		if (!isEqual(a, b)) { return; }
 		std::cout << location << ": check not equal (" << expression << ") failed" << std::endl;
@@ -248,7 +253,7 @@ public:
 		throw TestException();
 	}
 
-	void assert(bool expr, const std::string &location, const std::string &expression) const
+	void assert(bool expr, const std::string &expression) const
 	{
 		if (expr) { return; }
 		std::cout << location << ": check " << expression << " failed" << std::endl;
@@ -376,13 +381,13 @@ static upp11::TestInvokerParametrized<testname, decltype(params)> \
 void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(...) \
-upp11::TestBase().assert(__VA_ARGS__, LOCATION, #__VA_ARGS__)
+upp11::TestBase(LOCATION).assert(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EQUAL(...) \
-upp11::TestBase().assertEqual(__VA_ARGS__, LOCATION, #__VA_ARGS__)
+upp11::TestBase(LOCATION).assertEqual(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_NE(...) \
-upp11::TestBase().assertNe(__VA_ARGS__, LOCATION, #__VA_ARGS__)
+upp11::TestBase(LOCATION).assertNe(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
 upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)

@@ -51,25 +51,3 @@ UP_TEST(InvokerShouldCatchAllUnknownExceptionInTestRun)
 }
 
 UP_SUITE_END()
-
-UP_SUITE_BEGIN(suiteTestBase)
-
-UP_TEST(isEqualShouldCompareOtherTypes)
-{
-	TestBase base;
-	UP_ASSERT(!base.isEqual(1, 0));
-	UP_ASSERT(!base.isEqual(1, "0"));
-	UP_ASSERT(!base.isEqual("te", "next"));
-	UP_ASSERT(base.isEqual(100, 100));
-	UP_ASSERT(base.isEqual("last", "last"));
-
-	const list<int> lvalue = { 1, 2, 3, 4, 5 };
-	const vector<int> vvalue = { 1, 2, 3, 4, 5 };
-	UP_ASSERT(base.isEqual(lvalue, vvalue));
-
-	const list<string> lstring = { "one", "two", "free" };
-	const vector<string> vstring = { "one", "two", "free" };
-	UP_ASSERT(base.isEqual(lstring, vstring));
-}
-
-UP_SUITE_END()
