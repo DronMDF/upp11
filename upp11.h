@@ -172,7 +172,7 @@ std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
 	return os;
 }
 
-class TestBase {
+class TestAssert {
 	const std::string location;
 
 	template <typename T>
@@ -233,7 +233,7 @@ class TestBase {
 	}
 
 public:
-	TestBase(const std::string &location) : location(location) {}
+	TestAssert(const std::string &location) : location(location) {}
 
 	template <typename A, typename B>
 	void assertEqual(const A &a, const B &b, const std::string &expression) const
@@ -381,13 +381,13 @@ static upp11::TestInvokerParametrized<testname, decltype(params)> \
 void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(...) \
-upp11::TestBase(LOCATION).assert(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION).assert(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EQUAL(...) \
-upp11::TestBase(LOCATION).assertEqual(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION).assertEqual(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_NE(...) \
-upp11::TestBase(LOCATION).assertNe(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION).assertNe(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
 upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)
