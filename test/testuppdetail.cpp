@@ -51,3 +51,21 @@ UP_TEST(InvokerShouldCatchAllUnknownExceptionInTestRun)
 }
 
 UP_SUITE_END()
+
+UP_SUITE_BEGIN(suteTestEqual)
+
+UP_TEST(isEqualShouldCompareOtherTypes)
+{
+	TestEqual base;
+	UP_ASSERT(!base.isEqual(1, 0));
+	UP_ASSERT(!base.isEqual(1, "0"));
+	UP_ASSERT(!base.isEqual("te", "next"));
+	UP_ASSERT(base.isEqual(100, 100));
+	UP_ASSERT(base.isEqual("last", "last"));
+
+	UP_ASSERT(base.isEqual(list<int>{ 1, 2, 3, 4, 5 }, vector<int>{ 1, 2, 3, 4, 5 }));
+	UP_ASSERT(base.isEqual(list<string>{ "one", "two", "free" }, vector<string>{ "one", "two", "free" }));
+}
+
+UP_SUITE_END()
+

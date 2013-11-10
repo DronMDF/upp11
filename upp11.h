@@ -163,6 +163,40 @@ struct TestValue {
 		: value(begin, end), agregate(true) {}
 };
 
+struct TestValueFactory {
+	template <typename T>
+	static TestValue<T> create(const T &t) {
+		return TestValue<T>(t);
+	}
+	template<typename T>
+	static TestValue<T> create(const std::initializer_list<T> &t) {
+		return TestValue<T>(t.begin(), t.end());
+	}
+	template<typename T>
+	static TestValue<T> create(const std::initializer_list<const T> &t) {
+		return TestValue<T>(t.begin(), t.end());
+	}
+	template<typename T>
+	static TestValue<T> create(const std::list<T> &t) {
+		return TestValue<T>(t.begin(), t.end());
+	}
+	template<typename T>
+	static TestValue<T> create(const std::vector<T> &t) {
+		return TestValue<T>(t.begin(), t.end());
+	}
+	template<typename T, std::size_t size>
+	static TestValue<T> create(const std::array<T, size> &t) {
+		return TestValue<T>(t.begin(), t.end());
+	}
+	template<typename T, std::size_t size>
+	static TestValue<T> create(const T (&t)[size]) {
+		return TestValue<T>(&t[0], &t[size]);
+	}
+	static TestValue<std::string> create(const char *t) {
+		return TestValue<std::string>(t);
+	}
+};
+
 template <typename T>
 std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
 {
@@ -172,41 +206,7 @@ std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
 	return os;
 }
 
-class TestAssert {
-	const std::string location;
-
-	template <typename T>
-	TestValue<T> createTestValue(const T &t) const {
-		return TestValue<T>(t);
-	}
-	template<typename T>
-	TestValue<T> createTestValue(const std::initializer_list<T> &t) const {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T>
-	TestValue<T> createTestValue(const std::initializer_list<const T> &t) const {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T>
-	TestValue<T> createTestValue(const std::list<T> &t) const {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T>
-	TestValue<T> createTestValue(const std::vector<T> &t) const {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T, std::size_t size>
-	TestValue<T> createTestValue(const std::array<T, size> &t) const {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T, std::size_t size>
-	TestValue<T> createTestValue(const T (&t)[size]) const {
-		return TestValue<T>(&t[0], &t[size]);
-	}
-	TestValue<std::string> createTestValue(const char *t) const {
-		return TestValue<std::string>(t);
-	}
-
+class TestEqual {
 	template <typename A, typename B>
 	bool isEqualValue(const A &, const B &) const {
 		return false;
@@ -215,18 +215,22 @@ class TestAssert {
 	bool isEqualValue(const TestValue<T> &ta, const TestValue<T> &tb) const {
 		return ta.agregate == tb.agregate && ta.value == tb.value;
 	}
-
+public:
 	template <typename A, typename B>
 	bool isEqual(const A &a, const B &b) const {
-		const auto ta = createTestValue(a);
-		const auto tb = createTestValue(b);
+		const auto ta = TestValueFactory::create(a);
+		const auto tb = TestValueFactory::create(b);
 		return isEqualValue(ta, tb);
 	}
+};
+
+class TestAssert : private TestEqual {
+	const std::string location;
 
 	template <typename A, typename B>
 	std::string asPrintable(const A &a, const B &b) const {
-		const auto ta = createTestValue(a);
-		const auto tb = createTestValue(b);
+		const auto ta = TestValueFactory::create(a);
+		const auto tb = TestValueFactory::create(b);
 		std::ostringstream os;
 		os << ta << " vs " << tb;
 		return os.str();
