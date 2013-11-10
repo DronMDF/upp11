@@ -1,4 +1,5 @@
 
+#include <limits>
 #include <upp11.h>
 
 using namespace std;
@@ -67,5 +68,12 @@ UP_TEST(isEqualShouldCompareOtherTypes)
 	UP_ASSERT(base.isEqual(list<string>{ "one", "two", "free" }, vector<string>{ "one", "two", "free" }));
 }
 
-UP_SUITE_END()
+UP_TEST(isEqualShouldCompareOtherSignValues)
+{
+	TestEqual base;
+	UP_ASSERT(base.isEqual(1, 1U));
+	UP_ASSERT(!base.isEqual(-1, numeric_limits<unsigned>::max()));
+	UP_ASSERT(base.isEqual(0U, 0));
+}
 
+UP_SUITE_END()

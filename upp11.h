@@ -207,10 +207,37 @@ std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
 }
 
 class TestEqual {
-	template <typename A, typename B>
-	bool isEqualValue(const A &, const B &) const {
+	template <typename A, typename B, typename AI, typename BI>
+	bool isEqualDiffer(const TestValue<A> &, const TestValue<B> &, AI, BI) const {
 		return false;
 	}
+
+	template <typename A, typename B>
+	bool isEqualSign(const TestValue<A> &ta, const TestValue<B> &tb) const {
+		for (size_t i = 0; i < ta.value.size(); i++) {
+			if (ta.value[i] < static_cast<A>(std::numeric_limits<B>::min())) return false;
+			if (ta.value[i] > std::numeric_limits<B>::max()) return false;
+			if (ta.value[i] != tb.value[i]) return false;
+		}
+		return true;
+	}
+	template <typename A, typename B>
+	bool isEqualDiffer(const TestValue<A> &ta, const TestValue<B> &tb,
+			   std::true_type, std::true_type) const
+	{
+		if (ta.agregate != tb.agregate) return false;
+		if (ta.value.size() != tb.value.size()) return false;
+		if (std::is_signed<A>::value) return isEqualSign(ta, tb);
+		return isEqualSign(tb, ta);
+	}
+
+	template <typename A, typename B>
+	bool isEqualValue(const TestValue<A> &ta, const TestValue<B> &tb) const {
+		return isEqualDiffer(ta, tb, typename std::is_integral<A>::type(),
+				typename std::is_integral<B>::type());
+	}
+
+	// Compare equivalent values
 	template <typename T>
 	bool isEqualValue(const TestValue<T> &ta, const TestValue<T> &tb) const {
 		return ta.agregate == tb.agregate && ta.value == tb.value;
