@@ -1,8 +1,9 @@
 
 #pragma once
 #include <algorithm>
-#include <cstdlib>
 #include <chrono>
+#include <csignal>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -11,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <getopt.h>
+#include <string.h>
 
 namespace upp11 {
 
@@ -374,6 +376,12 @@ struct TestExceptionChecker {
 };
 
 class TestMain {
+	static void signalHandler(int signum) {
+		std::ostringstream out;
+		out << "Signal (" << strsignal(signum) << ") received";
+		throw std::runtime_error(out.str());
+	}
+
 public:
 	int main(int argc, char **argv) {
 		bool quiet = false;
@@ -386,6 +394,9 @@ public:
 			if (opt == 't') { timestamp = true; }
 			if (opt == 's') { seed = std::atoi(optarg); }
 		};
+		signal(SIGFPE, signalHandler);
+		signal(SIGILL, signalHandler);
+		signal(SIGSEGV, signalHandler);
 		return TestCollection::getInstance().runAllTests(seed, quiet, timestamp) ? 0 : -1;
 	}
 };

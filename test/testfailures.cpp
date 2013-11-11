@@ -19,19 +19,31 @@ UP_FIXTURE_TEST(ExceptionInFixtureShouldCheckpointed, throw_fixture)
 {
 }
 
-// This test send signal, we need translate signal to exception
-//struct zero_fixture {
-//	int divide(int a, int b) const;
-//};
+struct zero_fixture {
+	int divide(int a, int b) const;
+};
 
-//UP_FIXTURE_TEST(DivizionByZeroInTestShouldCheckpointed, zero_fixture)
-//{
-//	divide(10, 0);
-//}
+UP_FIXTURE_TEST(DivizionByZeroInTestShouldCheckpointed, zero_fixture)
+{
+	divide(10, 0);
+}
 
-//int zero_fixture::divide(int a, int b) const {
-//	return a / b;
-//}
+int zero_fixture::divide(int a, int b) const {
+	return a / b;
+}
+
+struct deref_fixture {
+	int deref(int *a) const;
+};
+
+UP_FIXTURE_TEST(SegFaultInTestShouldCheckpointed, deref_fixture)
+{
+	deref(nullptr);
+}
+
+int deref_fixture::deref(int *a) const {
+	return *a;
+}
 
 UP_SUITE_END()
 
