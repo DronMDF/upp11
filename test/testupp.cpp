@@ -86,6 +86,8 @@ UP_TEST(AssertEqualShouldCompareAnyTypes)
 	UP_ASSERT_EQUAL(100, 100);
 	UP_ASSERT_EQUAL("last", "last");
 	UP_ASSERT_EQUAL(string("last"), "last");
+	UP_ASSERT_EQUAL(string("test").size(), 4);
+	UP_ASSERT_EQUAL(string("test").size(), char(4));
 
 	const auto cvalue = { 1, 2, 3, 4, 5 };
 	const initializer_list<int> ivalue = { 1, 2, 3, 4, 5 };

@@ -214,9 +214,13 @@ class TestEqual {
 
 	template <typename A, typename B>
 	bool isEqualSign(const TestValue<A> &ta, const TestValue<B> &tb) const {
+		const B abmin = (std::is_unsigned<A>::value || std::is_unsigned<B>::value) ?
+			0 : std::numeric_limits<A>::min() /* both signed */ ;
+		const B abmax = (std::is_signed<A>::value || std::is_unsigned<B>::value ||
+				 sizeof(A) < sizeof(B))
+			? std::numeric_limits<A>::max() : std::numeric_limits<B>::max();
 		for (size_t i = 0; i < ta.value.size(); i++) {
-			if (ta.value[i] < static_cast<A>(std::numeric_limits<B>::min())) return false;
-			if (ta.value[i] > std::numeric_limits<B>::max()) return false;
+			if (tb.value[i] < abmin || tb.value[i] > abmax) return false;
 			if (ta.value[i] != tb.value[i]) return false;
 		}
 		return true;
@@ -227,7 +231,7 @@ class TestEqual {
 	{
 		if (ta.agregate != tb.agregate) return false;
 		if (ta.value.size() != tb.value.size()) return false;
-		if (std::is_signed<A>::value) return isEqualSign(ta, tb);
+		if (sizeof(A) <= sizeof(B)) return isEqualSign(ta, tb);
 		return isEqualSign(tb, ta);
 	}
 

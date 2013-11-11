@@ -74,6 +74,9 @@ UP_TEST(isEqualShouldCompareOtherSignValues)
 	UP_ASSERT(base.isEqual(1, 1U));
 	UP_ASSERT(!base.isEqual(-1, numeric_limits<unsigned>::max()));
 	UP_ASSERT(base.isEqual(0U, 0));
+	UP_ASSERT(base.isEqual(127U, numeric_limits<char>::max()));
+	UP_ASSERT(base.isEqual(numeric_limits<char>::min(), -128));
+	UP_ASSERT(base.isEqual(numeric_limits<uint8_t>::max(), 255));
 }
 
 UP_SUITE_END()
