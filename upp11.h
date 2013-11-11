@@ -19,7 +19,6 @@ private:
 	typedef std::pair<std::string, std::function<bool ()>> test_pair_t;
 	std::vector<test_pair_t> tests;
 	std::vector<std::string> suites;
-
 public:
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -71,6 +70,14 @@ public:
 		}
 		return !failure;
 	}
+
+	std::string checkpoint_location;
+	std::string checkpoint_message;
+
+	void checkpoint(const std::string &location, const std::string &message) {
+		checkpoint_location = location;
+		checkpoint_message = message;
+	}
 };
 
 class TestSuiteBegin {
@@ -91,30 +98,47 @@ class TestException {};
 
 template <typename T>
 class TestInvoker {
+	const std::string location;
 public:
+	TestInvoker(const std::string &location) : location(location) { }
+
 	bool invoke(std::function<void (T *)> test_function) const {
 		std::shared_ptr<T> instance;
 		try {
+			TestCollection::getInstance().checkpoint(location, "Test constructor");
 			instance = std::make_shared<T>();
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
 			std::cout << "exception from test ctor: " << e.what() << std::endl;
+			std::cout << TestCollection::getInstance().checkpoint_location
+				<< ": last checkpoint "
+				<< TestCollection::getInstance().checkpoint_message << std::endl;
 			return false;
 		} catch (...) {
 			std::cout << "unknown exception from test ctor" << std::endl;
+			std::cout << TestCollection::getInstance().checkpoint_location
+				<< ": last checkpoint "
+				<< TestCollection::getInstance().checkpoint_message << std::endl;
 			return false;
 		}
 
 		try {
+			TestCollection::getInstance().checkpoint(location, "Test run");
 			test_function(instance.get());
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
 			std::cout << "exception from test run: " << e.what() << std::endl;
+			std::cout << TestCollection::getInstance().checkpoint_location
+				<< ": last checkpoint "
+				<< TestCollection::getInstance().checkpoint_message << std::endl;
 			return false;
 		} catch (...) {
 			std::cout << "unknown exception from test run" << std::endl;
+			std::cout << TestCollection::getInstance().checkpoint_location
+				<< ": last checkpoint "
+				<< TestCollection::getInstance().checkpoint_message << std::endl;
 			return false;
 		}
 
@@ -129,7 +153,9 @@ private:
 		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1));
 	}
 public:
-	TestInvokerTrivial(const std::string &name) {
+	TestInvokerTrivial(const std::string &location, const std::string &name)
+		: TestInvoker<T>(location)
+	{
 		TestCollection::getInstance().addTest(name,
 			std::bind(&TestInvokerTrivial::invoke, this));
 	}
@@ -142,7 +168,8 @@ private:
 		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
 	}
 public:
-	TestInvokerParametrized(const std::string &name, const C &params)
+	TestInvokerParametrized(const std::string &location, const std::string &name, const C &params)
+		: TestInvoker<T>(location)
 	{
 		for (const auto v: params) {
 			TestCollection::getInstance().addTest(name,
@@ -389,14 +416,14 @@ namespace name { \
 struct testname { \
 	void run(); \
 }; \
-static upp11::TestInvokerTrivial<testname> testname##_invoker(#testname); \
+static upp11::TestInvokerTrivial<testname> testname##_invoker(LOCATION, #testname); \
 void testname::run()
 
 #define UP_FIXTURE_TEST(testname, fixture) \
 struct testname : public fixture { \
 	void run(); \
 }; \
-static upp11::TestInvokerTrivial<testname> testname##_invoker(#testname); \
+static upp11::TestInvokerTrivial<testname> testname##_invoker(LOCATION, #testname); \
 void testname::run()
 
 #define UP_PARAMETRIZED_TEST(testname, params) \
@@ -404,7 +431,7 @@ struct testname { \
 	void run(const decltype(params)::value_type &params); \
 }; \
 static upp11::TestInvokerParametrized<testname, decltype(params)> \
-	testname##_invoker(#testname, params); \
+	testname##_invoker(LOCATION, #testname, params); \
 void testname::run(const decltype(params)::value_type &params)
 
 #define UP_FIXTURE_PARAMETRIZED_TEST(testname, fixture, params) \
@@ -412,7 +439,7 @@ struct testname : public fixture { \
 	void run(const decltype(params)::value_type &params); \
 }; \
 static upp11::TestInvokerParametrized<testname, decltype(params)> \
-	testname##_invoker(#testname, params); \
+	testname##_invoker(LOCATION, #testname, params); \
 void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(...) \

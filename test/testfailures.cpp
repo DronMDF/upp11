@@ -2,6 +2,39 @@
 
 using namespace std;
 
+UP_SUITE_BEGIN(suiteCheckpoints)
+
+UP_TEST(UnhandledExceptionInTestShouldCheckpointed)
+{
+	throw false;
+}
+
+struct throw_fixture {
+	throw_fixture() {
+		throw runtime_error("setUp exception for checkpoint");
+	}
+};
+
+UP_FIXTURE_TEST(ExceptionInFixtureShouldCheckpointed, throw_fixture)
+{
+}
+
+// This test send signal, we need translate signal to exception
+//struct zero_fixture {
+//	int divide(int a, int b) const;
+//};
+
+//UP_FIXTURE_TEST(DivizionByZeroInTestShouldCheckpointed, zero_fixture)
+//{
+//	divide(10, 0);
+//}
+
+//int zero_fixture::divide(int a, int b) const {
+//	return a / b;
+//}
+
+UP_SUITE_END()
+
 UP_SUITE_BEGIN(suiteAssertEqual)
 
 UP_TEST(ShouldFailByNoEqual)
