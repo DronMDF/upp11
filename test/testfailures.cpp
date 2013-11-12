@@ -45,6 +45,36 @@ int deref_fixture::deref(int *a) const {
 	return *a;
 }
 
+UP_TEST(AssertIsCheckpoint)
+{
+	UP_ASSERT(true);
+	throw false;
+}
+
+UP_TEST(AssertEqualIsCheckpoint)
+{
+	UP_ASSERT_EQUAL(1, 1);
+	throw false;
+}
+
+UP_TEST(AssertNeIsCheckpoint)
+{
+	UP_ASSERT_NE(1, 0);
+	throw false;
+}
+
+UP_TEST(AssertExceptionIsCheckpoint)
+{
+	UP_ASSERT_EXCEPTION(runtime_error, []{ throw runtime_error("true"); });
+	throw false;
+}
+
+UP_TEST(AssertExceptionMessageIsCheckpoint)
+{
+	UP_ASSERT_EXCEPTION(runtime_error, "true", []{ throw runtime_error("true"); });
+	throw false;
+}
+
 UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteAssertEqual)

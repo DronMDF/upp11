@@ -281,7 +281,11 @@ class TestAssert : private TestEqual {
 	}
 
 public:
-	TestAssert(const std::string &location) : location(location) {}
+	TestAssert(const std::string &location, const std::string &checkpoint_message)
+		: location(location)
+	{
+		TestCollection::getInstance().checkpoint(location, checkpoint_message);
+	}
 
 	template <typename A, typename B>
 	void assertEqual(const A &a, const B &b, const std::string &expression) const
@@ -314,8 +318,12 @@ struct TestExceptionChecker {
 	const std::string location;
 	const std::string extype;
 
-	TestExceptionChecker(const std::string &location, const std::string &extype)
-		: location(location), extype(extype) {}
+	TestExceptionChecker(const std::string &location, const std::string &checkpoint_message,
+			     const std::string &extype)
+		: location(location), extype(extype)
+	{
+		TestCollection::getInstance().checkpoint(location, checkpoint_message);
+	}
 
 	void check(const std::function<void ()> &f) {
 		try {
@@ -326,14 +334,14 @@ struct TestExceptionChecker {
 		}
 		std::cout << location << ": expected exception "
 			<< extype << " not throw" << std::endl;
-		throw upp11::TestException();
+		throw TestException();
 	}
 
 	void check(const std::string &message, const std::function<void ()> &f) {
 		if (!std::is_convertible<E, std::exception>::value) {
 			std::cout << location << ": expected exception "
 				<< extype << " is not child of std::exception" << std::endl;
-			throw upp11::TestException();
+			throw TestException();
 		}
 		bool catched = false;
 		try {
@@ -349,13 +357,13 @@ struct TestExceptionChecker {
 				std::cout << location << ": check exception "
 					<< extype << "(\"" << message << "\") failed" << std::endl;
 				std::cout << "\tcatched exception: \"" << e.what() << "\"" << std::endl;
-				throw upp11::TestException();
+				throw TestException();
 			}
 		} catch (...) {
 		}
 		std::cout << location << ": expected exception "
 			<< extype << "(\"" << message << "\") not throw" << std::endl;
-		throw upp11::TestException();
+		throw TestException();
 	}
 };
 
@@ -438,13 +446,13 @@ static upp11::TestInvokerParametrized<testname, decltype(params)> \
 void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(...) \
-upp11::TestAssert(LOCATION).assert(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION, "UP_ASSERT").assert(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EQUAL(...) \
-upp11::TestAssert(LOCATION).assertEqual(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION, "UP_ASSERT_EQUAL").assertEqual(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_NE(...) \
-upp11::TestAssert(LOCATION).assertNe(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION, "UP_ASSERT_NE").assertNe(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
-upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)
+upp11::TestExceptionChecker<extype>(LOCATION, "UP_ASSERT_EXCEPTION", #extype).check(__VA_ARGS__)
