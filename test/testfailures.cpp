@@ -75,6 +75,17 @@ UP_TEST(AssertExceptionMessageIsCheckpoint)
 	throw false;
 }
 
+struct throw_param_fixture {
+	bool param() const {
+		throw false;
+	}
+};
+
+UP_FIXTURE_TEST(CheckpointShoildBeFixedBeforeArgumentsEvaluate, throw_param_fixture)
+{
+	UP_ASSERT(param());
+}
+
 UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteAssertEqual)

@@ -281,11 +281,7 @@ class TestAssert : private TestEqual {
 	}
 
 public:
-	TestAssert(const std::string &location, const std::string &checkpoint_message)
-		: location(location)
-	{
-		TestCollection::getInstance().checkpoint(location, checkpoint_message);
-	}
+	TestAssert(const std::string &location) : location(location) {}
 
 	template <typename A, typename B>
 	void assertEqual(const A &a, const B &b, const std::string &expression) const
@@ -318,12 +314,8 @@ struct TestExceptionChecker {
 	const std::string location;
 	const std::string extype;
 
-	TestExceptionChecker(const std::string &location, const std::string &checkpoint_message,
-			     const std::string &extype)
-		: location(location), extype(extype)
-	{
-		TestCollection::getInstance().checkpoint(location, checkpoint_message);
-	}
+	TestExceptionChecker(const std::string &location, const std::string &extype)
+		: location(location), extype(extype) {}
 
 	void check(const std::function<void ()> &f) {
 		try {
@@ -369,6 +361,7 @@ struct TestExceptionChecker {
 
 class TestMain {
 	static void signalHandler(int signum) {
+		signal(signum, signalHandler);
 		std::ostringstream out;
 		out << "Signal (" << strsignal(signum) << ") received";
 		throw std::runtime_error(out.str());
@@ -446,13 +439,17 @@ static upp11::TestInvokerParametrized<testname, decltype(params)> \
 void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(...) \
-upp11::TestAssert(LOCATION, "UP_ASSERT").assert(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT"), \
+upp11::TestAssert(LOCATION).assert(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EQUAL(...) \
-upp11::TestAssert(LOCATION, "UP_ASSERT_EQUAL").assertEqual(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT_EQUAL"), \
+upp11::TestAssert(LOCATION).assertEqual(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_NE(...) \
-upp11::TestAssert(LOCATION, "UP_ASSERT_NE").assertNe(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT_NE"), \
+upp11::TestAssert(LOCATION).assertNe(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EXCEPTION(extype, ...) \
-upp11::TestExceptionChecker<extype>(LOCATION, "UP_ASSERT_EXCEPTION", #extype).check(__VA_ARGS__)
+upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT_EXCEPTION"), \
+upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)
