@@ -17,15 +17,15 @@ suiteAssertExceptionWithMessage::ShouldFailByType: FAIL
 test/testfailures.cpp(63): check not equal (1, 1) failed
 	1,  vs 1, 
 suiteAssertNe::ShouldFailByEqual: FAIL
-exception from test run: Signal (Floating point exception) received
-test/testfailures.cpp(26): last checkpoint Test run
+unexpected test termination: Signal (Floating point exception) received
+test/testfailures.cpp(26): last checkpoint: run test
 suiteCheckpoints::DivizionByZeroInTestShouldCheckpointed: FAIL
-exception from test ctor: setUp exception for checkpoint
-test/testfailures.cpp(18): last checkpoint Test constructor
+unexpected test termination: setUp exception for checkpoint
+test/testfailures.cpp(18): last checkpoint: fixture setUp
 suiteCheckpoints::ExceptionInFixtureShouldCheckpointed: FAIL
-exception from test run: Signal (Segmentation fault) received
-test/testfailures.cpp(39): last checkpoint Test run
+unexpected test termination: Signal (Segmentation fault) received
+test/testfailures.cpp(39): last checkpoint: run test
 suiteCheckpoints::SegFaultInTestShouldCheckpointed: FAIL
-unknown exception from test run
-test/testfailures.cpp(7): last checkpoint Test run
+unexpected test termination
+test/testfailures.cpp(7): last checkpoint: run test
 suiteCheckpoints::UnhandledExceptionInTestShouldCheckpointed: FAIL

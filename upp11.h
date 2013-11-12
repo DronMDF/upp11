@@ -105,45 +105,29 @@ public:
 	TestInvoker(const std::string &location) : location(location) { }
 
 	bool invoke(std::function<void (T *)> test_function) const {
-		std::shared_ptr<T> instance;
 		try {
-			TestCollection::getInstance().checkpoint(location, "Test constructor");
-			instance = std::make_shared<T>();
+			TestCollection::getInstance().checkpoint(location, "fixture setUp");
+			T instance;
+
+			TestCollection::getInstance().checkpoint(location, "run test");
+			test_function(&instance);
+
+			TestCollection::getInstance().checkpoint(location, "fixture tearDown");
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
-			std::cout << "exception from test ctor: " << e.what() << std::endl;
+			std::cout << "unexpected test termination: " << e.what() << std::endl;
 			std::cout << TestCollection::getInstance().checkpoint_location
-				<< ": last checkpoint "
+				<< ": last checkpoint: "
 				<< TestCollection::getInstance().checkpoint_message << std::endl;
 			return false;
 		} catch (...) {
-			std::cout << "unknown exception from test ctor" << std::endl;
+			std::cout << "unexpected test termination" << std::endl;
 			std::cout << TestCollection::getInstance().checkpoint_location
-				<< ": last checkpoint "
+				<< ": last checkpoint: "
 				<< TestCollection::getInstance().checkpoint_message << std::endl;
 			return false;
 		}
-
-		try {
-			TestCollection::getInstance().checkpoint(location, "Test run");
-			test_function(instance.get());
-		} catch (const TestException &) {
-			return false;
-		} catch (const std::exception &e) {
-			std::cout << "exception from test run: " << e.what() << std::endl;
-			std::cout << TestCollection::getInstance().checkpoint_location
-				<< ": last checkpoint "
-				<< TestCollection::getInstance().checkpoint_message << std::endl;
-			return false;
-		} catch (...) {
-			std::cout << "unknown exception from test run" << std::endl;
-			std::cout << TestCollection::getInstance().checkpoint_location
-				<< ": last checkpoint "
-				<< TestCollection::getInstance().checkpoint_message << std::endl;
-			return false;
-		}
-
 		return true;
 	}
 };
