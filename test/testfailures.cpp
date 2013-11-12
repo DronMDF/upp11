@@ -86,6 +86,12 @@ UP_FIXTURE_TEST(CheckpointShoildBeFixedBeforeArgumentsEvaluate, throw_param_fixt
 	UP_ASSERT(param());
 }
 
+UP_TEST(ExplicitCheckpointShouldBe)
+{
+	UP_CHECKPOINT("user checkpoint");
+	throw false;
+}
+
 UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteAssertEqual)

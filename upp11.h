@@ -453,3 +453,6 @@ upp11::TestAssert(LOCATION).assertNe(__VA_ARGS__, #__VA_ARGS__)
 #define UP_ASSERT_EXCEPTION(extype, ...) \
 upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT_EXCEPTION"), \
 upp11::TestExceptionChecker<extype>(LOCATION, #extype).check(__VA_ARGS__)
+
+#define UP_CHECKPOINT(...) \
+upp11::TestCollection::getInstance().checkpoint(LOCATION, __VA_ARGS__)

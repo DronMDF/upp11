@@ -1,20 +1,20 @@
-test/testfailures.cpp(95): check equal (1, 0) failed
+test/testfailures.cpp(101): check equal (1, 0) failed
 	1,  vs 0, 
 suiteAssertEqual::ShouldFailByNoEqual: FAIL
-test/testfailures.cpp(154): expected exception runtime_error not throw
+test/testfailures.cpp(160): expected exception runtime_error not throw
 suiteAssertException::ShouldFailByNoThrow: FAIL
-test/testfailures.cpp(147): expected exception int not throw
+test/testfailures.cpp(153): expected exception int not throw
 suiteAssertException::ShouldFailByType: FAIL
-test/testfailures.cpp(136): expected exception overflow_error("message") not throw
+test/testfailures.cpp(142): expected exception overflow_error("message") not throw
 suiteAssertExceptionWithMessage::ShouldFailByChildException: FAIL
-test/testfailures.cpp(122): expected exception runtime_error("hello") not throw
+test/testfailures.cpp(128): expected exception runtime_error("hello") not throw
 suiteAssertExceptionWithMessage::ShouldFailByNoThrow: FAIL
-test/testfailures.cpp(129): check exception exception("message") failed
+test/testfailures.cpp(135): check exception exception("message") failed
 	catched exception: "another message"
 suiteAssertExceptionWithMessage::ShouldFailByNotEqualMessage: FAIL
-test/testfailures.cpp(115): expected exception int is not child of std::exception
+test/testfailures.cpp(121): expected exception int is not child of std::exception
 suiteAssertExceptionWithMessage::ShouldFailByType: FAIL
-test/testfailures.cpp(104): check not equal (1, 1) failed
+test/testfailures.cpp(110): check not equal (1, 1) failed
 	1,  vs 1, 
 suiteAssertNe::ShouldFailByEqual: FAIL
 unexpected test termination
@@ -41,6 +41,9 @@ suiteCheckpoints::DivizionByZeroInTestShouldCheckpointed: FAIL
 unexpected test termination: setUp exception for checkpoint
 test/testfailures.cpp(18): last checkpoint: fixture setUp
 suiteCheckpoints::ExceptionInFixtureShouldCheckpointed: FAIL
+unexpected test termination
+test/testfailures.cpp(91): last checkpoint: user checkpoint
+suiteCheckpoints::ExplicitCheckpointShouldBe: FAIL
 unexpected test termination: Signal (Segmentation fault) received
 test/testfailures.cpp(39): last checkpoint: run test
 suiteCheckpoints::SegFaultInTestShouldCheckpointed: FAIL
