@@ -1,31 +1,31 @@
 test/testfailures.cpp(54): check equal (1, 0) failed
 	1,  vs 0, 
-suiteAssertEqual/ShouldFailByNoEqual: FAIL
+suiteAssertEqual::ShouldFailByNoEqual: FAIL
 test/testfailures.cpp(113): expected exception runtime_error not throw
-suiteAssertException/ShouldFailByNoThrow: FAIL
+suiteAssertException::ShouldFailByNoThrow: FAIL
 test/testfailures.cpp(106): expected exception int not throw
-suiteAssertException/ShouldFailByType: FAIL
+suiteAssertException::ShouldFailByType: FAIL
 test/testfailures.cpp(95): expected exception overflow_error("message") not throw
-suiteAssertExceptionWithMessage/ShouldFailByChildException: FAIL
+suiteAssertExceptionWithMessage::ShouldFailByChildException: FAIL
 test/testfailures.cpp(81): expected exception runtime_error("hello") not throw
-suiteAssertExceptionWithMessage/ShouldFailByNoThrow: FAIL
+suiteAssertExceptionWithMessage::ShouldFailByNoThrow: FAIL
 test/testfailures.cpp(88): check exception exception("message") failed
 	catched exception: "another message"
-suiteAssertExceptionWithMessage/ShouldFailByNotEqualMessage: FAIL
+suiteAssertExceptionWithMessage::ShouldFailByNotEqualMessage: FAIL
 test/testfailures.cpp(74): expected exception int is not child of std::exception
-suiteAssertExceptionWithMessage/ShouldFailByType: FAIL
+suiteAssertExceptionWithMessage::ShouldFailByType: FAIL
 test/testfailures.cpp(63): check not equal (1, 1) failed
 	1,  vs 1, 
-suiteAssertNe/ShouldFailByEqual: FAIL
+suiteAssertNe::ShouldFailByEqual: FAIL
 exception from test run: Signal (Floating point exception) received
 test/testfailures.cpp(26): last checkpoint Test run
-suiteCheckpoints/DivizionByZeroInTestShouldCheckpointed: FAIL
+suiteCheckpoints::DivizionByZeroInTestShouldCheckpointed: FAIL
 exception from test ctor: setUp exception for checkpoint
 test/testfailures.cpp(18): last checkpoint Test constructor
-suiteCheckpoints/ExceptionInFixtureShouldCheckpointed: FAIL
+suiteCheckpoints::ExceptionInFixtureShouldCheckpointed: FAIL
 exception from test run: Signal (Segmentation fault) received
 test/testfailures.cpp(39): last checkpoint Test run
-suiteCheckpoints/SegFaultInTestShouldCheckpointed: FAIL
+suiteCheckpoints::SegFaultInTestShouldCheckpointed: FAIL
 unknown exception from test run
 test/testfailures.cpp(7): last checkpoint Test run
-suiteCheckpoints/UnhandledExceptionInTestShouldCheckpointed: FAIL
+suiteCheckpoints::UnhandledExceptionInTestShouldCheckpointed: FAIL

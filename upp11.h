@@ -38,7 +38,7 @@ public:
 	void addTest(const std::string &name, std::function<bool ()> test) {
 		std::string path;
 		for (auto s: suites) {
-			path += s + "/";
+			path += s + "::";
 		}
 		tests.push_back(std::make_pair(path + name, test));
 	}
