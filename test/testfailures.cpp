@@ -92,6 +92,11 @@ UP_TEST(ExplicitCheckpointShouldBe)
 	throw false;
 }
 
+UP_FIXTURE_TEST(SecondSignalShouldBeCatched, deref_fixture)
+{
+	UP_ASSERT_EQUAL(deref(nullptr), 42);
+}
+
 UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteAssertEqual)

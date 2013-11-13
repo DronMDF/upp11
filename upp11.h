@@ -2,8 +2,8 @@
 #pragma once
 #include <algorithm>
 #include <chrono>
-#include <csignal>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -12,7 +12,8 @@
 #include <sstream>
 #include <vector>
 #include <getopt.h>
-#include <string.h>
+#include <signal.h>
+#include <setjmp.h>
 
 namespace upp11 {
 
@@ -98,6 +99,51 @@ public:
 
 class TestException {};
 
+class TestSignalAction {
+	int signum;
+	struct sigaction oldaction;
+public:
+	TestSignalAction(int signum, void (*action)(int)) : signum(signum) {
+		sigaction(signum, nullptr, &oldaction);	// check
+		if (oldaction.sa_handler == nullptr && oldaction.sa_sigaction == nullptr) {
+			struct sigaction newaction;
+			std::memset(&newaction, 0, sizeof(newaction));
+			sigemptyset(&newaction.sa_mask);
+			newaction.sa_handler = action;
+			sigaction(signum, &newaction, nullptr);
+		}
+	}
+	~TestSignalAction() {
+		if (oldaction.sa_handler != nullptr || oldaction.sa_sigaction != nullptr) {
+			sigaction(signum, &oldaction, nullptr);
+		}
+	}
+};
+
+class TestSignalHandler {
+	TestSignalAction actionIll;
+	TestSignalAction actionFpe;
+	TestSignalAction actionSegv;
+
+	static sigjmp_buf &jumpbuf() {
+		static sigjmp_buf buf;
+		return buf;
+	}
+
+	static void action(int sig) {
+		siglongjmp(jumpbuf(), sig);
+	}
+
+public:
+	TestSignalHandler()
+		: actionIll(SIGILL, action), actionFpe(SIGFPE, action), actionSegv(SIGSEGV, action)
+	{
+		if (sigsetjmp(jumpbuf(), 1) != 0) {
+			throw std::runtime_error("Test terminated by signal");
+		}
+	}
+};
+
 template <typename T>
 class TestInvoker {
 	const std::string location;
@@ -106,6 +152,7 @@ public:
 
 	bool invoke(std::function<void (T *)> test_function) const {
 		try {
+			TestSignalHandler sighandler;
 			TestCollection::getInstance().checkpoint(location, "fixture setUp");
 			T instance;
 
@@ -360,13 +407,6 @@ struct TestExceptionChecker {
 };
 
 class TestMain {
-	static void signalHandler(int signum) {
-		signal(signum, signalHandler);
-		std::ostringstream out;
-		out << "Signal (" << strsignal(signum) << ") received";
-		throw std::runtime_error(out.str());
-	}
-
 public:
 	int main(int argc, char **argv) {
 		bool quiet = false;
@@ -379,9 +419,6 @@ public:
 			if (opt == 't') { timestamp = true; }
 			if (opt == 's') { seed = std::atoi(optarg); }
 		};
-		signal(SIGFPE, signalHandler);
-		signal(SIGILL, signalHandler);
-		signal(SIGSEGV, signalHandler);
 		return TestCollection::getInstance().runAllTests(seed, quiet, timestamp) ? 0 : -1;
 	}
 };
