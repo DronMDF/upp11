@@ -17,7 +17,17 @@
 
 namespace upp11 {
 
-class TestException {};
+class TestException {
+public:
+	const std::string location;
+	const std::string message;
+	const std::string detail;
+	TestException(const std::string &location, const std::string &message,
+		      const std::string &detail = std::string())
+		: location(location), message(message), detail(detail)
+	{
+	}
+};
 
 class TestSignalAction {
 	int signum;
@@ -77,7 +87,11 @@ private:
 		try {
 			TestSignalHandler sighandler;
 			test_invoker();
-		} catch (const TestException &) {
+		} catch (const TestException &e) {
+			std::cout << e.location << ": " << e.message << std::endl;
+			if (!e.detail.empty()) {
+				std::cout << "\t" << e.detail << std::endl;
+			}
 			return false;
 		} catch (const std::exception &e) {
 			std::cout << "unexpected test termination: " << e.what() << std::endl;
@@ -335,25 +349,20 @@ public:
 	void assertEqual(const A &a, const B &b, const std::string &expression) const
 	{
 		if (isEqual(a, b)) { return; }
-		std::cout << location << ": check equal (" << expression << ") failed" << std::endl;
-		std::cout << "\t" << asPrintable(a, b) << std::endl;
-		throw TestException();
+		throw TestException(location, "check equal (" + expression + ") failed", asPrintable(a, b));
 	}
 
 	template <typename A, typename B>
 	void assertNe(const A &a, const B &b, const std::string &expression) const
 	{
 		if (!isEqual(a, b)) { return; }
-		std::cout << location << ": check not equal (" << expression << ") failed" << std::endl;
-		std::cout << "\t" << asPrintable(a, b) << std::endl;
-		throw TestException();
+		throw TestException(location, "check not equal (" + expression + ") failed", asPrintable(a, b));
 	}
 
 	void assert(bool expr, const std::string &expression) const
 	{
 		if (expr) { return; }
-		std::cout << location << ": check " << expression << " failed" << std::endl;
-		throw TestException();
+		throw TestException(location, "check " + expression + " failed");
 	}
 };
 
@@ -363,7 +372,9 @@ struct TestExceptionChecker {
 	const std::string extype;
 
 	TestExceptionChecker(const std::string &location, const std::string &extype)
-		: location(location), extype(extype) {}
+		: location(location), extype(extype)
+	{
+	}
 
 	void check(const std::function<void ()> &f) {
 		try {
@@ -372,16 +383,13 @@ struct TestExceptionChecker {
 			return;
 		} catch (...) {
 		}
-		std::cout << location << ": expected exception "
-			<< extype << " not throw" << std::endl;
-		throw TestException();
+		throw TestException(location, "expected exception " + extype + " not throw");
 	}
 
 	void check(const std::string &message, const std::function<void ()> &f) {
 		if (!std::is_convertible<E, std::exception>::value) {
-			std::cout << location << ": expected exception "
-				<< extype << " is not child of std::exception" << std::endl;
-			throw TestException();
+			throw TestException(location, "expected exception " + extype +
+					    " is not child of std::exception");
 		}
 		bool catched = false;
 		try {
@@ -394,16 +402,13 @@ struct TestExceptionChecker {
 		} catch (const std::exception &e) {
 			if (catched) {
 				if (e.what() == message) { return; }
-				std::cout << location << ": check exception "
-					<< extype << "(\"" << message << "\") failed" << std::endl;
-				std::cout << "\tcatched exception: \"" << e.what() << "\"" << std::endl;
-				throw TestException();
+				throw TestException(location,
+					"check exception " + extype + "(\"" + message + "\") failed",
+					"catched exception: \"" + std::string(e.what()) + "\"");
 			}
 		} catch (...) {
 		}
-		std::cout << location << ": expected exception "
-			<< extype << "(\"" << message << "\") not throw" << std::endl;
-		throw TestException();
+		throw TestException(location, "expected exception " + extype + "(\"" + message + "\") not throw");
 	}
 };
 
