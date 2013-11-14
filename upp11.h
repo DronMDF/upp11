@@ -66,11 +66,11 @@ public:
 
 class TestCollection {
 private:
-	typedef std::pair<std::string, std::function<bool ()>> test_pair_t;
+	typedef std::pair<std::string, std::function<void ()>> test_pair_t;
 	std::vector<test_pair_t> tests;
 	std::vector<std::string> suites;
 
-	bool invoke(std::function<bool ()> test_invoker) const {
+	bool invoke(std::function<void ()> test_invoker) const {
 		try {
 			TestSignalHandler sighandler;
 			test_invoker();
@@ -106,7 +106,7 @@ public:
 		suites.pop_back();
 	}
 
-	void addTest(const std::string &name, std::function<bool ()> test) {
+	void addTest(const std::string &name, std::function<void ()> test) {
 		std::string path;
 		for (auto s: suites) {
 			path += s + "::";
@@ -173,7 +173,7 @@ class TestInvoker {
 public:
 	TestInvoker(const std::string &location) : location(location) { }
 
-	bool invoke(std::function<void (T *)> test_function) const {
+	void invoke(std::function<void (T *)> test_function) const {
 		TestCollection::getInstance().checkpoint(location, "fixture setUp");
 		T instance;
 
@@ -187,8 +187,8 @@ public:
 template <typename T>
 class TestInvokerTrivial : public TestInvoker<T> {
 private:
-	bool invoke() {
-		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1));
+	void invoke() {
+		TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1));
 	}
 public:
 	TestInvokerTrivial(const std::string &location, const std::string &name)
@@ -202,8 +202,8 @@ public:
 template <typename T, typename C>
 class TestInvokerParametrized : public TestInvoker<T> {
 private:
-	bool invoke(const typename C::value_type &params) {
-		return TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
+	void invoke(const typename C::value_type &params) {
+		TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
 	}
 public:
 	TestInvokerParametrized(const std::string &location, const std::string &name, const C &params)
