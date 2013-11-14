@@ -70,6 +70,9 @@ private:
 	std::vector<test_pair_t> tests;
 	std::vector<std::string> suites;
 
+	std::string checkpoint_location;
+	std::string checkpoint_message;
+
 	bool invoke(std::function<void ()> test_invoker) const {
 		try {
 			TestSignalHandler sighandler;
@@ -78,15 +81,11 @@ private:
 			return false;
 		} catch (const std::exception &e) {
 			std::cout << "unexpected test termination: " << e.what() << std::endl;
-			std::cout << TestCollection::getInstance().checkpoint_location
-				<< ": last checkpoint: "
-				<< TestCollection::getInstance().checkpoint_message << std::endl;
+			std::cout << checkpoint_location << ": last checkpoint: " << checkpoint_message << std::endl;
 			return false;
 		} catch (...) {
 			std::cout << "unexpected test termination" << std::endl;
-			std::cout << TestCollection::getInstance().checkpoint_location
-				<< ": last checkpoint: "
-				<< TestCollection::getInstance().checkpoint_message << std::endl;
+			std::cout << checkpoint_location << ": last checkpoint: " << checkpoint_message << std::endl;
 			return false;
 		}
 		return true;
@@ -143,9 +142,6 @@ public:
 		}
 		return !failure;
 	}
-
-	std::string checkpoint_location;
-	std::string checkpoint_message;
 
 	void checkpoint(const std::string &location, const std::string &message) {
 		checkpoint_location = location;
