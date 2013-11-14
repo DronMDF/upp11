@@ -17,86 +17,6 @@
 
 namespace upp11 {
 
-class TestCollection {
-private:
-	typedef std::pair<std::string, std::function<bool ()>> test_pair_t;
-	std::vector<test_pair_t> tests;
-	std::vector<std::string> suites;
-public:
-	static TestCollection &getInstance() {
-		static TestCollection collection;
-		return collection;
-	}
-
-	void beginSuite(const std::string &name) {
-		suites.push_back(name);
-	}
-
-	void endSuite() {
-		suites.pop_back();
-	}
-
-	void addTest(const std::string &name, std::function<bool ()> test) {
-		std::string path;
-		for (auto s: suites) {
-			path += s + "::";
-		}
-		tests.push_back(std::make_pair(path + name, test));
-	}
-
-	bool runAllTests(unsigned seed, bool quiet, bool timestamp) {
-		// Отсортируем все по именам, чтобы не зависело от порядка линковки
-		std::sort(tests.begin(), tests.end(),
-			[](const test_pair_t &A, const test_pair_t &B){ return A.first < B.first; });
-		if (seed != 0) {
-			if (!quiet) {
-				std::cout << "random seed: " << seed << std::endl;
-			}
-			std::default_random_engine r(seed);
-			std::shuffle(tests.begin(), tests.end(), r);
-		}
-		bool failure = false;
-		for (auto t: tests) {
-			using namespace std::chrono;
-			const high_resolution_clock::time_point st = high_resolution_clock::now();
-			const bool success = t.second();
-			const high_resolution_clock::time_point et = high_resolution_clock::now();
-			const unsigned us = duration_cast<microseconds>(et - st).count();
-			if (!quiet || !success) {
-				std::cout << t.first;
-				if (timestamp) {
-					std::cout << " (" << us << "us)";
-				}
-				std::cout << ": " << (success ? "SUCCESS" : "FAIL") << std::endl;
-			}
-			failure |= !success;
-		}
-		return !failure;
-	}
-
-	std::string checkpoint_location;
-	std::string checkpoint_message;
-
-	void checkpoint(const std::string &location, const std::string &message) {
-		checkpoint_location = location;
-		checkpoint_message = message;
-	}
-};
-
-class TestSuiteBegin {
-public:
-	TestSuiteBegin(const std::string &name) {
-		TestCollection::getInstance().beginSuite(name);
-	}
-};
-
-class TestSuiteEnd {
-public:
-	TestSuiteEnd() {
-		TestCollection::getInstance().endSuite();
-	}
-};
-
 class TestException {};
 
 class TestSignalAction {
@@ -144,22 +64,16 @@ public:
 	}
 };
 
-template <typename T>
-class TestInvoker {
-	const std::string location;
-public:
-	TestInvoker(const std::string &location) : location(location) { }
+class TestCollection {
+private:
+	typedef std::pair<std::string, std::function<bool ()>> test_pair_t;
+	std::vector<test_pair_t> tests;
+	std::vector<std::string> suites;
 
-	bool invoke(std::function<void (T *)> test_function) const {
+	bool invoke(std::function<bool ()> test_invoker) const {
 		try {
 			TestSignalHandler sighandler;
-			TestCollection::getInstance().checkpoint(location, "fixture setUp");
-			T instance;
-
-			TestCollection::getInstance().checkpoint(location, "run test");
-			test_function(&instance);
-
-			TestCollection::getInstance().checkpoint(location, "fixture tearDown");
+			test_invoker();
 		} catch (const TestException &) {
 			return false;
 		} catch (const std::exception &e) {
@@ -176,6 +90,97 @@ public:
 			return false;
 		}
 		return true;
+	}
+
+public:
+	static TestCollection &getInstance() {
+		static TestCollection collection;
+		return collection;
+	}
+
+	void beginSuite(const std::string &name) {
+		suites.push_back(name);
+	}
+
+	void endSuite() {
+		suites.pop_back();
+	}
+
+	void addTest(const std::string &name, std::function<bool ()> test) {
+		std::string path;
+		for (auto s: suites) {
+			path += s + "::";
+		}
+		tests.push_back(std::make_pair(path + name, test));
+	}
+
+	bool runAllTests(unsigned seed, bool quiet, bool timestamp) {
+		// Отсортируем все по именам, чтобы не зависело от порядка линковки
+		std::sort(tests.begin(), tests.end(),
+			[](const test_pair_t &A, const test_pair_t &B){ return A.first < B.first; });
+		if (seed != 0) {
+			if (!quiet) {
+				std::cout << "random seed: " << seed << std::endl;
+			}
+			std::default_random_engine r(seed);
+			std::shuffle(tests.begin(), tests.end(), r);
+		}
+		bool failure = false;
+		for (auto t: tests) {
+			using namespace std::chrono;
+			const high_resolution_clock::time_point st = high_resolution_clock::now();
+			const bool success = invoke(t.second);
+			const high_resolution_clock::time_point et = high_resolution_clock::now();
+			const unsigned us = duration_cast<microseconds>(et - st).count();
+			if (!quiet || !success) {
+				std::cout << t.first;
+				if (timestamp) {
+					std::cout << " (" << us << "us)";
+				}
+				std::cout << ": " << (success ? "SUCCESS" : "FAIL") << std::endl;
+			}
+			failure |= !success;
+		}
+		return !failure;
+	}
+
+	std::string checkpoint_location;
+	std::string checkpoint_message;
+
+	void checkpoint(const std::string &location, const std::string &message) {
+		checkpoint_location = location;
+		checkpoint_message = message;
+	}
+};
+
+class TestSuiteBegin {
+public:
+	TestSuiteBegin(const std::string &name) {
+		TestCollection::getInstance().beginSuite(name);
+	}
+};
+
+class TestSuiteEnd {
+public:
+	TestSuiteEnd() {
+		TestCollection::getInstance().endSuite();
+	}
+};
+
+template <typename T>
+class TestInvoker {
+	const std::string location;
+public:
+	TestInvoker(const std::string &location) : location(location) { }
+
+	bool invoke(std::function<void (T *)> test_function) const {
+		TestCollection::getInstance().checkpoint(location, "fixture setUp");
+		T instance;
+
+		TestCollection::getInstance().checkpoint(location, "run test");
+		test_function(&instance);
+
+		TestCollection::getInstance().checkpoint(location, "fixture tearDown");
 	}
 };
 
