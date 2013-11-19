@@ -35,6 +35,17 @@ UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteOutput)
 
+template <typename T>
+void CUSTOM_ASSERT_OUTPUT(const T &value, const string &expected)
+{
+	// Given
+	ostringstream os;
+	// When
+	os << value;
+	// Then
+	UP_ASSERT_EQUAL(os.str(), expected);
+}
+
 const auto int_values = {
 	make_pair(-1, "-1"),
 	make_pair(0, "0"),
@@ -44,13 +55,20 @@ const auto int_values = {
 
 UP_PARAMETRIZED_TEST(shouldOutIntScalar, int_values)
 {
-	// Given
-	const auto s = TestValueFactory::create(get<0>(int_values));
-	ostringstream os;
-	// When
-	os << s;
-	// Then
-	UP_ASSERT_EQUAL(os.str(), get<1>(int_values));
+	CUSTOM_ASSERT_OUTPUT(TestValueFactory::create(get<0>(int_values)), get<1>(int_values));
+}
+
+const auto vint_values = {
+	make_pair(list<int>{-1}, "{ -1 }"),
+	make_pair(list<int>{0}, "{ 0 }"),
+	make_pair(list<int>{1000000000}, "{ 1000000000 }"),
+	make_pair(list<int>{-2000000000}, "{ -2000000000 }"),
+	make_pair(list<int>{-1, 1, 5, 100}, "{ -1, 1, 5, 100 }")
+};
+
+UP_PARAMETRIZED_TEST(shouldOutIntCollection, vint_values)
+{
+	CUSTOM_ASSERT_OUTPUT(TestValueFactory::create(get<0>(vint_values)), get<1>(vint_values));
 }
 
 UP_SUITE_END()
