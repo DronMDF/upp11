@@ -138,7 +138,8 @@ public:
 			std::default_random_engine r(seed);
 			std::shuffle(tests.begin(), tests.end(), r);
 		}
-		bool failure = false;
+		int all_tests = 0;
+		int failures = 0;
 		for (auto t: tests) {
 			using namespace std::chrono;
 			const high_resolution_clock::time_point st = high_resolution_clock::now();
@@ -152,9 +153,12 @@ public:
 				}
 				std::cout << ": " << (success ? "SUCCESS" : "FAIL") << std::endl;
 			}
-			failure |= !success;
+			all_tests += 1;
+			failures += (success ? 0 : 1);
 		}
-		return !failure;
+		std::cout << "Run " << all_tests << " tests "
+			<< "with " << failures << " failures" << std::endl;
+		return failures == 0;
 	}
 
 	void checkpoint(const std::string &location, const std::string &message) {

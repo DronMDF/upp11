@@ -53,3 +53,4 @@ suiteCheckpoints::SegFaultInTestShouldCheckpointed: FAIL
 unexpected test termination
 test/testfailures.cpp(7): last checkpoint: run test
 suiteCheckpoints::UnhandledExceptionInTestShouldCheckpointed: FAIL
+Run 20 tests with 20 failures
