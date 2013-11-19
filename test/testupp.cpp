@@ -83,6 +83,8 @@ void CUSTOM_EQUAL_ASSERTION()
 
 UP_TEST(AssertEqualShouldCompareAnyTypes)
 {
+	UP_ASSERT(-1 == numeric_limits<unsigned>::max());
+	UP_ASSERT_NE(-1, numeric_limits<unsigned>::max());
 	UP_ASSERT_EQUAL(100, 100);
 	UP_ASSERT_EQUAL("last", "last");
 	UP_ASSERT_EQUAL(string("last"), "last");

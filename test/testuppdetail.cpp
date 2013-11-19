@@ -32,3 +32,25 @@ UP_TEST(isEqualShouldCompareOtherSignValues)
 }
 
 UP_SUITE_END()
+
+UP_SUITE_BEGIN(suiteOutput)
+
+const auto int_values = {
+	make_pair(-1, "-1"),
+	make_pair(0, "0"),
+	make_pair(1000000000, "1000000000"),
+	make_pair(-2000000000, "-2000000000")
+};
+
+UP_PARAMETRIZED_TEST(shouldOutIntScalar, int_values)
+{
+	// Given
+	const auto s = TestValueFactory::create(get<0>(int_values));
+	ostringstream os;
+	// When
+	os << s;
+	// Then
+	UP_ASSERT_EQUAL(os.str(), get<1>(int_values));
+}
+
+UP_SUITE_END()

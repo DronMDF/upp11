@@ -1,5 +1,5 @@
 test/testfailures.cpp(106): check equal (1, 0) failed
-	1,  vs 0, 
+	1 vs 0
 suiteAssertEqual::ShouldFailByNoEqual: FAIL
 test/testfailures.cpp(165): expected exception runtime_error not throw
 suiteAssertException::ShouldFailByNoThrow: FAIL
@@ -15,7 +15,7 @@ suiteAssertExceptionWithMessage::ShouldFailByNotEqualMessage: FAIL
 test/testfailures.cpp(126): expected exception int is not child of std::exception
 suiteAssertExceptionWithMessage::ShouldFailByType: FAIL
 test/testfailures.cpp(115): check not equal (1, 1) failed
-	1,  vs 1, 
+	1 vs 1
 suiteAssertNe::ShouldFailByEqual: FAIL
 unexpected test termination
 test/testfailures.cpp(56): last checkpoint: UP_ASSERT_EQUAL

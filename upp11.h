@@ -276,7 +276,9 @@ template <typename T>
 std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
 {
 	if (t.agregate) { os << "{ "; }
-	std::copy(t.value.begin(), t.value.end(), std::ostream_iterator<T>(os, ", "));
+	for (size_t p = 0; p < t.value.size(); p++) {
+		os << t.value[p] << (p + 1 < t.value.size() ? ", " : "");
+	}
 	if (t.agregate) { os << " }"; }
 	return os;
 }
