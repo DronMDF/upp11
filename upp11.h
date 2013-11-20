@@ -151,7 +151,6 @@ public:
 			std::default_random_engine r(seed);
 			std::shuffle(tests.begin(), tests.end(), r);
 		}
-		int all_tests = 0;
 		int failures = 0;
 		for (auto t: tests) {
 			using namespace std::chrono;
@@ -166,10 +165,9 @@ public:
 				}
 				std::cout << ": " << (success ? "SUCCESS" : "FAIL") << std::endl;
 			}
-			all_tests += 1;
 			failures += (success ? 0 : 1);
 		}
-		std::cout << "Run " << all_tests << " tests "
+		std::cout << "Run " << tests.size() << " tests "
 			<< "with " << failures << " failures" << std::endl;
 		return failures == 0;
 	}
