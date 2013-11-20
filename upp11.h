@@ -105,6 +105,14 @@ private:
 		return true;
 	}
 
+	bool missPatterns(const std::vector<std::string> &patterns, const test_pair_t &test) {
+		if (patterns.empty()) { return false; }
+		for (const auto &p: patterns) {
+			if (test.first.find(p) != std::string::npos) { return false; }
+		}
+		return true;
+	}
+
 public:
 	static TestCollection &getInstance() {
 		static TestCollection collection;
@@ -127,8 +135,13 @@ public:
 		tests.push_back(std::make_pair(path + name, test));
 	}
 
-	bool runAllTests(unsigned seed, bool quiet, bool timestamp) {
-		// Отсортируем все по именам, чтобы не зависело от порядка линковки
+	bool runAllTests(const std::vector<std::string> &patterns, unsigned seed, bool quiet, bool timestamp)
+	{
+		// Remove all tests not match to pattern
+		auto new_end = std::remove_if(tests.begin(), tests.end(),
+			std::bind(&TestCollection::missPatterns, this, patterns, std::placeholders::_1));
+		tests.erase(new_end, tests.end());
+		// Sort by name
 		std::sort(tests.begin(), tests.end(),
 			[](const test_pair_t &A, const test_pair_t &B){ return A.first < B.first; });
 		if (seed != 0) {
@@ -424,14 +437,16 @@ public:
 		bool quiet = false;
 		bool timestamp = false;
 		int seed = time(0);
+		std::vector<std::string> patterns;
 		while (true) {
-			int opt = getopt(argc, argv, "qts:");
+			int opt = getopt(argc, argv, "qts:r:");
 			if (opt == -1) { break; }
 			if (opt == 'q') { quiet = true; }
 			if (opt == 't') { timestamp = true; }
 			if (opt == 's') { seed = std::atoi(optarg); }
+			if (opt == 'r') { patterns.push_back(optarg); }
 		};
-		return TestCollection::getInstance().runAllTests(seed, quiet, timestamp) ? 0 : -1;
+		return TestCollection::getInstance().runAllTests(patterns, seed, quiet, timestamp) ? 0 : -1;
 	}
 };
 
@@ -447,7 +462,7 @@ int main(int argc, char **argv) { \
 }
 
 #define UP_RUN() \
-upp11::TestCollection::getInstance().runAllTests(0, false, false)
+upp11::TestCollection::getInstance().runAllTests({}, 0, false, false)
 
 #define UP_SUITE_BEGIN(name) \
 namespace name { \
