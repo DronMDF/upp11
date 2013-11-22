@@ -35,17 +35,6 @@ UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteOutput)
 
-template <typename T>
-void CUSTOM_ASSERT_OUTPUT(const T &value, const string &expected)
-{
-	// Given
-	ostringstream os;
-	// When
-	os << value;
-	// Then
-	UP_ASSERT_EQUAL(os.str(), expected);
-}
-
 const auto int_values = {
 	make_pair(-1, "-1"),
 	make_pair(0, "0"),
@@ -55,7 +44,8 @@ const auto int_values = {
 
 UP_PARAMETRIZED_TEST(shouldOutIntScalar, int_values)
 {
-	CUSTOM_ASSERT_OUTPUT(TestValueFactory::create(get<0>(int_values)), get<1>(int_values));
+	const auto value = TestValueFactory::create(get<0>(int_values));
+	UP_ASSERT_EQUAL(TestPrinter::str(value), get<1>(int_values));
 }
 
 const auto vint_values = {
@@ -68,7 +58,8 @@ const auto vint_values = {
 
 UP_PARAMETRIZED_TEST(shouldOutIntCollection, vint_values)
 {
-	CUSTOM_ASSERT_OUTPUT(TestValueFactory::create(get<0>(vint_values)), get<1>(vint_values));
+	const auto value = TestValueFactory::create(get<0>(vint_values));
+	UP_ASSERT_EQUAL(TestPrinter::str(value), get<1>(vint_values));
 }
 
 UP_SUITE_END()

@@ -287,17 +287,6 @@ struct TestValueFactory {
 	}
 };
 
-template <typename T>
-std::ostream &operator << (std::ostream &os, const TestValue<T> &t)
-{
-	if (t.agregate) { os << "{ "; }
-	for (size_t p = 0; p < t.value.size(); p++) {
-		os << t.value[p] << (p + 1 < t.value.size() ? ", " : "");
-	}
-	if (t.agregate) { os << " }"; }
-	return os;
-}
-
 class TestEqual {
 	template <typename A, typename B, typename AI, typename BI>
 	bool isEqualDiffer(const TestValue<A> &, const TestValue<B> &, AI, BI) const {
@@ -347,16 +336,27 @@ public:
 	}
 };
 
+struct TestPrinter {
+	template <typename T>
+	static std::string str(const TestValue<T> &t) {
+		std::ostringstream os;
+		if (t.agregate) { os << "{ "; }
+		for (size_t p = 0; p < t.value.size(); p++) {
+			os << t.value[p] << (p + 1 < t.value.size() ? ", " : "");
+		}
+		if (t.agregate) { os << " }"; }
+		return os.str();
+	}
+};
+
 class TestAssert : private TestEqual {
 	const std::string location;
 
 	template <typename A, typename B>
-	std::string asPrintable(const A &a, const B &b) const {
+	std::string vsPrint(const A &a, const B &b) const {
 		const auto ta = TestValueFactory::create(a);
 		const auto tb = TestValueFactory::create(b);
-		std::ostringstream os;
-		os << ta << " vs " << tb;
-		return os.str();
+		return TestPrinter::str(ta) + " vs " + TestPrinter::str(tb);
 	}
 
 public:
@@ -366,14 +366,14 @@ public:
 	void assertEqual(const A &a, const B &b, const std::string &expression) const
 	{
 		if (isEqual(a, b)) { return; }
-		throw TestException(location, "check equal (" + expression + ") failed", asPrintable(a, b));
+		throw TestException(location, "check equal (" + expression + ") failed", vsPrint(a, b));
 	}
 
 	template <typename A, typename B>
 	void assertNe(const A &a, const B &b, const std::string &expression) const
 	{
 		if (!isEqual(a, b)) { return; }
-		throw TestException(location, "check not equal (" + expression + ") failed", asPrintable(a, b));
+		throw TestException(location, "check not equal (" + expression + ") failed", vsPrint(a, b));
 	}
 
 	void assert(bool expr, const std::string &expression) const
