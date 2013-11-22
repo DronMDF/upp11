@@ -44,8 +44,7 @@ const auto int_values = {
 
 UP_PARAMETRIZED_TEST(shouldOutIntScalar, int_values)
 {
-	const auto value = TestValueFactory::create(get<0>(int_values));
-	UP_ASSERT_EQUAL(TestPrinter::str(value), get<1>(int_values));
+	UP_ASSERT_EQUAL(TestPrinter::str(get<0>(int_values)), get<1>(int_values));
 }
 
 const auto vint_values = {
@@ -58,8 +57,7 @@ const auto vint_values = {
 
 UP_PARAMETRIZED_TEST(shouldOutIntCollection, vint_values)
 {
-	const auto value = TestValueFactory::create(get<0>(vint_values));
-	UP_ASSERT_EQUAL(TestPrinter::str(value), get<1>(vint_values));
+	UP_ASSERT_EQUAL(TestPrinter::str(get<0>(vint_values)), get<1>(vint_values));
 }
 
 UP_SUITE_END()

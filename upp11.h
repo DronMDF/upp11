@@ -338,13 +338,14 @@ public:
 
 struct TestPrinter {
 	template <typename T>
-	static std::string str(const TestValue<T> &t) {
+	static std::string str(const T &t) {
+		const auto tt = TestValueFactory::create(t);
 		std::ostringstream os;
-		if (t.agregate) { os << "{ "; }
-		for (size_t p = 0; p < t.value.size(); p++) {
-			os << t.value[p] << (p + 1 < t.value.size() ? ", " : "");
+		if (tt.agregate) { os << "{ "; }
+		for (size_t p = 0; p < tt.value.size(); p++) {
+			os << tt.value[p] << (p + 1 < tt.value.size() ? ", " : "");
 		}
-		if (t.agregate) { os << " }"; }
+		if (tt.agregate) { os << " }"; }
 		return os.str();
 	}
 };
@@ -354,9 +355,7 @@ class TestAssert : private TestEqual {
 
 	template <typename A, typename B>
 	std::string vsPrint(const A &a, const B &b) const {
-		const auto ta = TestValueFactory::create(a);
-		const auto tb = TestValueFactory::create(b);
-		return TestPrinter::str(ta) + " vs " + TestPrinter::str(tb);
+		return TestPrinter::str(a) + " vs " + TestPrinter::str(b);
 	}
 
 public:
