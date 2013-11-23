@@ -66,4 +66,10 @@ UP_FIXTURE_TEST(StringShouldQuoted, TestPrinter)
 	UP_ASSERT_EQUAL(printable(string("string")), "\"string\"");
 }
 
+UP_FIXTURE_TEST(PairShouldColonSeparated, TestPrinter)
+{
+	UP_ASSERT_EQUAL(printable(make_pair(0, 1)), "0, 1");
+	UP_ASSERT_EQUAL(printable(make_tuple(0, 1, "aaa")), "0, 1, \"aaa\"");
+}
+
 UP_SUITE_END()

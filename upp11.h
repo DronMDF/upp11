@@ -337,6 +337,7 @@ public:
 };
 
 class TestPrinter {
+protected:
 	template <typename T>
 	std::string printableValue(const TestValue<T> &tt) const {
 		std::ostringstream os;
@@ -347,7 +348,6 @@ class TestPrinter {
 		if (tt.agregate) { os << " }"; }
 		return os.str();
 	}
-
 	std::string printableValue(const TestValue<std::string> &tt) const {
 		std::ostringstream os;
 		if (tt.agregate) { os << "{ "; }
@@ -362,7 +362,32 @@ public:
 	std::string printable(const T &t) const {
 		return printableValue(TestValueFactory::create(t));
 	}
+	template <typename... T> std::string printable(const std::tuple<T...> &t) const;
+	template <typename... T> std::string printable(const std::pair<T...> &t) const;
 };
+
+template <typename T, size_t index = std::tuple_size<T>::value - 1>
+struct TestAgregatePrinter : private TestPrinter {
+	std::string printable(const T &t) const {
+		const std::string value = printableValue(TestValueFactory::create(std::get<index>(t)));
+		return TestAgregatePrinter<T, index - 1>().printable(t) + ", " + value;
+	}
+};
+template <typename T>
+struct TestAgregatePrinter<T, 0> : private TestPrinter {
+	std::string printable(const T &t) const {
+		return printableValue(TestValueFactory::create(std::get<0>(t)));
+	}
+};
+
+template <typename... T>
+std::string TestPrinter::printable(const std::tuple<T...> &t) const {
+	return TestAgregatePrinter<std::tuple<T...>>().printable(t);
+}
+template <typename... T>
+std::string TestPrinter::printable(const std::pair<T...> &t) const {
+	return TestAgregatePrinter<std::pair<T...>>().printable(t);
+}
 
 class TestAssert : private TestEqual, private TestPrinter {
 	const std::string location;
