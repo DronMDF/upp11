@@ -42,9 +42,9 @@ const auto int_values = {
 	make_pair(-2000000000, "-2000000000")
 };
 
-UP_PARAMETRIZED_TEST(shouldOutIntScalar, int_values)
+UP_FIXTURE_PARAMETRIZED_TEST(shouldOutIntScalar, TestPrinter, int_values)
 {
-	UP_ASSERT_EQUAL(TestPrinter::str(get<0>(int_values)), get<1>(int_values));
+	UP_ASSERT_EQUAL(printable(get<0>(int_values)), get<1>(int_values));
 }
 
 const auto vint_values = {
@@ -55,9 +55,15 @@ const auto vint_values = {
 	make_pair(list<int>{-1, 1, 5, 100}, "{ -1, 1, 5, 100 }")
 };
 
-UP_PARAMETRIZED_TEST(shouldOutIntCollection, vint_values)
+UP_FIXTURE_PARAMETRIZED_TEST(shouldOutIntCollection, TestPrinter, vint_values)
 {
-	UP_ASSERT_EQUAL(TestPrinter::str(get<0>(vint_values)), get<1>(vint_values));
+	UP_ASSERT_EQUAL(printable(get<0>(vint_values)), get<1>(vint_values));
+}
+
+UP_FIXTURE_TEST(StringShouldQuoted, TestPrinter)
+{
+	UP_ASSERT_EQUAL(printable("const char *"), "\"const char *\"");
+	UP_ASSERT_EQUAL(printable(string("string")), "\"string\"");
 }
 
 UP_SUITE_END()

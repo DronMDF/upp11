@@ -336,10 +336,9 @@ public:
 	}
 };
 
-struct TestPrinter {
+class TestPrinter {
 	template <typename T>
-	static std::string str(const T &t) {
-		const auto tt = TestValueFactory::create(t);
+	std::string printableValue(const TestValue<T> &tt) const {
 		std::ostringstream os;
 		if (tt.agregate) { os << "{ "; }
 		for (size_t p = 0; p < tt.value.size(); p++) {
@@ -348,14 +347,29 @@ struct TestPrinter {
 		if (tt.agregate) { os << " }"; }
 		return os.str();
 	}
+
+	std::string printableValue(const TestValue<std::string> &tt) const {
+		std::ostringstream os;
+		if (tt.agregate) { os << "{ "; }
+		for (size_t p = 0; p < tt.value.size(); p++) {
+			os << "\"" << tt.value[p] << "\"" << (p + 1 < tt.value.size() ? ", " : "");
+		}
+		if (tt.agregate) { os << " }"; }
+		return os.str();
+	}
+public:
+	template <typename T>
+	std::string printable(const T &t) const {
+		return printableValue(TestValueFactory::create(t));
+	}
 };
 
-class TestAssert : private TestEqual {
+class TestAssert : private TestEqual, private TestPrinter {
 	const std::string location;
 
 	template <typename A, typename B>
 	std::string vsPrint(const A &a, const B &b) const {
-		return TestPrinter::str(a) + " vs " + TestPrinter::str(b);
+		return printable(a) + " vs " + printable(b);
 	}
 
 public:
