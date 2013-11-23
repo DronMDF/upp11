@@ -193,55 +193,6 @@ public:
 };
 
 template <typename T>
-class TestInvoker {
-	const std::string location;
-public:
-	TestInvoker(const std::string &location) : location(location) { }
-
-	void invoke(std::function<void (T *)> test_function) const {
-		TestCollection::getInstance().checkpoint(location, "fixture setUp");
-		T instance;
-
-		TestCollection::getInstance().checkpoint(location, "run test");
-		test_function(&instance);
-
-		TestCollection::getInstance().checkpoint(location, "fixture tearDown");
-	}
-};
-
-template <typename T>
-class TestInvokerTrivial : public TestInvoker<T> {
-private:
-	void invoke() {
-		TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1));
-	}
-public:
-	TestInvokerTrivial(const std::string &location, const std::string &name)
-		: TestInvoker<T>(location)
-	{
-		TestCollection::getInstance().addTest(name,
-			std::bind(&TestInvokerTrivial::invoke, this));
-	}
-};
-
-template <typename T, typename C>
-class TestInvokerParametrized : public TestInvoker<T> {
-private:
-	void invoke(const typename C::value_type &params) {
-		TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
-	}
-public:
-	TestInvokerParametrized(const std::string &location, const std::string &name, const C &params)
-		: TestInvoker<T>(location)
-	{
-		for (const auto v: params) {
-			TestCollection::getInstance().addTest(name,
-				std::bind(&TestInvokerParametrized::invoke, this, v));
-		}
-	}
-};
-
-template <typename T>
 struct TestValue {
 	const std::vector<T> value;
 	const bool agregate;
@@ -464,6 +415,56 @@ struct TestExceptionChecker {
 		} catch (...) {
 		}
 		throw TestException(location, "expected exception " + extype + "(\"" + message + "\") not throw");
+	}
+};
+
+template <typename T>
+class TestInvoker {
+	const std::string location;
+public:
+	TestInvoker(const std::string &location) : location(location) { }
+
+	void invoke(std::function<void (T *)> test_function) const {
+		TestCollection::getInstance().checkpoint(location, "fixture setUp");
+		T instance;
+
+		TestCollection::getInstance().checkpoint(location, "run test");
+		test_function(&instance);
+
+		TestCollection::getInstance().checkpoint(location, "fixture tearDown");
+	}
+};
+
+template <typename T>
+class TestInvokerTrivial : public TestInvoker<T> {
+private:
+	void invoke() {
+		TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1));
+	}
+public:
+	TestInvokerTrivial(const std::string &location, const std::string &name)
+		: TestInvoker<T>(location)
+	{
+		TestCollection::getInstance().addTest(name,
+			std::bind(&TestInvokerTrivial::invoke, this));
+	}
+};
+
+template <typename T, typename C>
+class TestInvokerParametrized : public TestInvoker<T> {
+private:
+	void invoke(const typename C::value_type &params) {
+		TestInvoker<T>::invoke(std::bind(&T::run, std::placeholders::_1, params));
+	}
+public:
+	TestInvokerParametrized(const std::string &location, const std::string &name, const C &params)
+		: TestInvoker<T>(location)
+	{
+		for (const auto v: params) {
+			TestCollection::getInstance().addTest(
+				name + "<" + TestPrinter().printable(v) + ">",
+				std::bind(&TestInvokerParametrized::invoke, this, v));
+		}
 	}
 };
 
