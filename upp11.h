@@ -365,7 +365,7 @@ public:
 		throw TestException(location, "check not equal (" + expression + ") failed", vsPrint(a, b));
 	}
 
-	void assert(bool expr, const std::string &expression) const
+	void assertTrue(bool expr, const std::string &expression) const
 	{
 		if (expr) { return; }
 		throw TestException(location, "check " + expression + " failed");
@@ -541,7 +541,7 @@ void testname::run(const decltype(params)::value_type &params)
 
 #define UP_ASSERT(...) \
 upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT"), \
-upp11::TestAssert(LOCATION).assert(__VA_ARGS__, #__VA_ARGS__)
+upp11::TestAssert(LOCATION).assertTrue(__VA_ARGS__, #__VA_ARGS__)
 
 #define UP_ASSERT_EQUAL(...) \
 upp11::TestCollection::getInstance().checkpoint(LOCATION, "UP_ASSERT_EQUAL"), \

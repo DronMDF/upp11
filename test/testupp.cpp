@@ -1,5 +1,6 @@
 
 #include <map>
+#include <assert.h>
 #include <upp11.h>
 
 using namespace std;
