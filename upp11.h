@@ -497,9 +497,10 @@ public:
 
 } // end of namespace upp11
 
-#define T_(x) #x
-#define T(x) T_(x)
-#define LOCATION __FILE__ "(" T(__LINE__) ")"
+// Workaround for preprocessor number to string conversion
+#define LINE_TEXT_(x) #x
+#define LINE_TEXT(x) LINE_TEXT_(x)
+#define LOCATION __FILE__ "(" LINE_TEXT(__LINE__) ")"
 
 #define UP_MAIN() \
 int main(int argc, char **argv) { \
