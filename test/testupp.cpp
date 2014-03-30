@@ -42,6 +42,7 @@ const auto prime = { 3, 5, 7, 13 };
 
 // Fixture is not only for setUp/tearDown, but for help functions
 struct prime_checker {
+	virtual ~prime_checker() = default;
 	bool isPrime(int p) {
 		for (int n = 2; n < p; n++) {
 			if (p % n == 0) {
@@ -84,7 +85,6 @@ void CUSTOM_EQUAL_ASSERTION()
 
 UP_TEST(AssertEqualShouldCompareAnyTypes)
 {
-	UP_ASSERT(-1 == numeric_limits<unsigned>::max());
 	UP_ASSERT_NE(-1, numeric_limits<unsigned>::max());
 	UP_ASSERT_EQUAL(100, 100);
 	UP_ASSERT_EQUAL("last", "last");

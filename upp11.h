@@ -33,7 +33,7 @@ class TestSignalAction {
 	int signum;
 	struct sigaction oldaction;
 public:
-	TestSignalAction(int signum, void (*action)(int)) : signum(signum) {
+	TestSignalAction(int signum, void (*action)(int)) : signum(signum), oldaction() {
 		sigaction(signum, nullptr, &oldaction);	// check
 		if (oldaction.sa_handler == nullptr && oldaction.sa_sigaction == nullptr) {
 			struct sigaction newaction;
@@ -82,6 +82,10 @@ private:
 
 	std::string checkpoint_location;
 	std::string checkpoint_message;
+
+	TestCollection(): tests(), suites(), checkpoint_location(), checkpoint_message()
+	{
+	}
 
 	bool invoke(std::function<void ()> test_invoker) const {
 		try {
@@ -279,6 +283,7 @@ class TestEqual {
 		return ta.agregate == tb.agregate && ta.value == tb.value;
 	}
 public:
+	virtual ~TestEqual() = default;
 	template <typename A, typename B>
 	bool isEqual(const A &a, const B &b) const {
 		const auto ta = TestValueFactory::create(a);
@@ -309,6 +314,7 @@ protected:
 		return os.str();
 	}
 public:
+	virtual ~TestPrinter() = default;
 	template <typename T>
 	std::string printable(const T &t) const {
 		return printableValue(TestValueFactory::create(t));
@@ -421,6 +427,8 @@ struct TestExceptionChecker {
 template <typename T>
 class TestInvoker {
 	const std::string location;
+protected:
+	virtual ~TestInvoker() = default;
 public:
 	TestInvoker(const std::string &location) : location(location) { }
 

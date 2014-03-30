@@ -10,6 +10,7 @@ UP_TEST(UnhandledExceptionInTestShouldCheckpointed)
 }
 
 struct throw_fixture {
+	virtual ~throw_fixture() = default;
 	throw_fixture() {
 		throw runtime_error("setUp exception for checkpoint");
 	}
@@ -20,6 +21,7 @@ UP_FIXTURE_TEST(ExceptionInFixtureShouldCheckpointed, throw_fixture)
 }
 
 struct zero_fixture {
+	virtual ~zero_fixture() = default;
 	int divide(int a, int b) const;
 };
 
@@ -33,6 +35,7 @@ int zero_fixture::divide(int a, int b) const {
 }
 
 struct deref_fixture {
+	virtual ~deref_fixture() = default;
 	int deref(int *a) const;
 };
 
@@ -76,6 +79,7 @@ UP_TEST(AssertExceptionMessageIsCheckpoint)
 }
 
 struct throw_param_fixture {
+	virtual ~throw_param_fixture() = default;
 	bool param() const {
 		throw false;
 	}

@@ -1,54 +1,54 @@
-test/testfailures.cpp(106): check equal (1, 0) failed
+test/testfailures.cpp(110): check equal (1, 0) failed
 	1 vs 0
 suiteAssertEqual::ShouldFailByNoEqual: FAIL
-test/testfailures.cpp(165): expected exception runtime_error not throw
+test/testfailures.cpp(169): expected exception runtime_error not throw
 suiteAssertException::ShouldFailByNoThrow: FAIL
-test/testfailures.cpp(158): expected exception int not throw
+test/testfailures.cpp(162): expected exception int not throw
 suiteAssertException::ShouldFailByType: FAIL
-test/testfailures.cpp(147): expected exception overflow_error("message") not throw
+test/testfailures.cpp(151): expected exception overflow_error("message") not throw
 suiteAssertExceptionWithMessage::ShouldFailByChildException: FAIL
-test/testfailures.cpp(133): expected exception runtime_error("hello") not throw
+test/testfailures.cpp(137): expected exception runtime_error("hello") not throw
 suiteAssertExceptionWithMessage::ShouldFailByNoThrow: FAIL
-test/testfailures.cpp(140): check exception exception("message") failed
+test/testfailures.cpp(144): check exception exception("message") failed
 	catched exception: "another message"
 suiteAssertExceptionWithMessage::ShouldFailByNotEqualMessage: FAIL
-test/testfailures.cpp(126): expected exception int is not child of std::exception
+test/testfailures.cpp(130): expected exception int is not child of std::exception
 suiteAssertExceptionWithMessage::ShouldFailByType: FAIL
-test/testfailures.cpp(115): check not equal (1, 1) failed
+test/testfailures.cpp(119): check not equal (1, 1) failed
 	1 vs 1
 suiteAssertNe::ShouldFailByEqual: FAIL
 unexpected test termination
-test/testfailures.cpp(56): last checkpoint: UP_ASSERT_EQUAL
+test/testfailures.cpp(59): last checkpoint: UP_ASSERT_EQUAL
 suiteCheckpoints::AssertEqualIsCheckpoint: FAIL
 unexpected test termination
-test/testfailures.cpp(68): last checkpoint: UP_ASSERT_EXCEPTION
+test/testfailures.cpp(71): last checkpoint: UP_ASSERT_EXCEPTION
 suiteCheckpoints::AssertExceptionIsCheckpoint: FAIL
 unexpected test termination
-test/testfailures.cpp(74): last checkpoint: UP_ASSERT_EXCEPTION
+test/testfailures.cpp(77): last checkpoint: UP_ASSERT_EXCEPTION
 suiteCheckpoints::AssertExceptionMessageIsCheckpoint: FAIL
 unexpected test termination
-test/testfailures.cpp(50): last checkpoint: UP_ASSERT
+test/testfailures.cpp(53): last checkpoint: UP_ASSERT
 suiteCheckpoints::AssertIsCheckpoint: FAIL
 unexpected test termination
-test/testfailures.cpp(62): last checkpoint: UP_ASSERT_NE
+test/testfailures.cpp(65): last checkpoint: UP_ASSERT_NE
 suiteCheckpoints::AssertNeIsCheckpoint: FAIL
 unexpected test termination
-test/testfailures.cpp(86): last checkpoint: UP_ASSERT
+test/testfailures.cpp(90): last checkpoint: UP_ASSERT
 suiteCheckpoints::CheckpointShoildBeFixedBeforeArgumentsEvaluate: FAIL
 unexpected test termination: Test terminated by signal
-test/testfailures.cpp(26): last checkpoint: run test
+test/testfailures.cpp(28): last checkpoint: run test
 suiteCheckpoints::DivizionByZeroInTestShouldCheckpointed: FAIL
 unexpected test termination: setUp exception for checkpoint
-test/testfailures.cpp(18): last checkpoint: fixture setUp
+test/testfailures.cpp(19): last checkpoint: fixture setUp
 suiteCheckpoints::ExceptionInFixtureShouldCheckpointed: FAIL
 unexpected test termination
-test/testfailures.cpp(91): last checkpoint: user checkpoint
+test/testfailures.cpp(95): last checkpoint: user checkpoint
 suiteCheckpoints::ExplicitCheckpointShouldBe: FAIL
 unexpected test termination: Test terminated by signal
-test/testfailures.cpp(97): last checkpoint: UP_ASSERT_EQUAL
+test/testfailures.cpp(101): last checkpoint: UP_ASSERT_EQUAL
 suiteCheckpoints::SecondSignalShouldBeCatched: FAIL
 unexpected test termination: Test terminated by signal
-test/testfailures.cpp(39): last checkpoint: run test
+test/testfailures.cpp(42): last checkpoint: run test
 suiteCheckpoints::SegFaultInTestShouldCheckpointed: FAIL
 unexpected test termination
 test/testfailures.cpp(7): last checkpoint: run test
