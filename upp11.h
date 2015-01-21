@@ -198,7 +198,11 @@ public:
 
 template <typename T>
 struct TestValue {
-	const std::vector<T> value;
+	typedef typename std::conditional<std::is_unsigned<T>::value, uint64_t,
+		typename std::conditional<std::is_signed<T>::value || std::is_enum<T>::value,
+			int64_t, T>::type>::type type;
+
+	const std::vector<type> value;
 	const bool agregate;
 
 	TestValue(const T &iv)
@@ -250,14 +254,14 @@ class TestEqual {
 
 	template <typename A, typename B>
 	bool isEqualSign(const TestValue<A> &ta, const TestValue<B> &tb) const {
-		const B abmin = (std::is_unsigned<A>::value || std::is_unsigned<B>::value) ?
-			0 : std::numeric_limits<A>::min() /* both signed */ ;
-		const B abmax = (std::is_signed<A>::value || std::is_unsigned<B>::value ||
-				 sizeof(A) < sizeof(B))
-			? std::numeric_limits<A>::max() : std::numeric_limits<B>::max();
+		typedef typename TestValue<A>::type atype;
+		typedef typename TestValue<B>::type btype;
+		const atype amax = std::numeric_limits<atype>::max();
+		const btype bmin = std::numeric_limits<btype>::min();
 		for (size_t i = 0; i < ta.value.size(); i++) {
-			if (tb.value[i] < abmin || tb.value[i] > abmax) return false;
-			if (ta.value[i] != tb.value[i]) return false;
+			if (ta.value[i] < static_cast<atype>(bmin)) return false;
+			if (tb.value[i] > static_cast<btype>(amax)) return false;
+			if (tb.value[i] != static_cast<btype>(ta.value[i])) return false;
 		}
 		return true;
 	}
@@ -267,7 +271,7 @@ class TestEqual {
 	{
 		if (ta.agregate != tb.agregate) return false;
 		if (ta.value.size() != tb.value.size()) return false;
-		if (sizeof(A) <= sizeof(B)) return isEqualSign(ta, tb);
+		if (std::is_signed<typename TestValue<A>::type>::value) return isEqualSign(ta, tb);
 		return isEqualSign(tb, ta);
 	}
 
