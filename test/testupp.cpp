@@ -96,7 +96,7 @@ UP_TEST(AssertEqualShouldCompareAnyTypes)
 	const initializer_list<int> ivalue = { 1, 2, 3, 4, 5 };
 	const list<int> lvalue = { 1, 2, 3, 4, 5 };
 	const vector<int> vvalue = { 1, 2, 3, 4, 5 };
-	const array<int, 5> avalue = { 1, 2, 3, 4, 5 };
+	const array<int, 5> avalue = {{ 1, 2, 3, 4, 5 }};
 	const int rvalue[] = { 1, 2, 3, 4, 5 };
 	UP_ASSERT_EQUAL(lvalue, lvalue);
 	UP_ASSERT_EQUAL(cvalue, lvalue);

@@ -41,8 +41,8 @@ static_assert(is_same<type_traits<long long unsigned>::type, uint64_t>::value,
 static_assert(is_same<type_traits<unsigned>::type, uint64_t>::value,
 	"unsigned is not convert to uint64_t");
 
-static_assert(is_same<type_traits<const char []>::type, string>::value,
-	"const char [] is not convert to string");
+static_assert(is_same<type_traits<char [5]>::type, string>::value,
+	"char [] is not convert to string");
 static_assert(is_same<type_traits<const char *>::type, string>::value,
 	"const char * is not convert to string");
 // This is generic conversion

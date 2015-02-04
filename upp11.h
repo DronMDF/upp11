@@ -201,12 +201,16 @@ namespace detail {
 // Generic type_traits (should applicable only for comparable values)
 template<typename T, typename E = void>
 struct type_traits {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef typename std::decay<T>::type type;
 };
 
 // Bool type_traits
 template<>
 struct type_traits<bool, void> {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef bool type;
 };
 
@@ -215,6 +219,8 @@ template<typename T>
 struct type_traits<T, typename std::enable_if<std::is_signed<T>::value &&
 	!std::is_floating_point<T>::value>::type>
 {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef int64_t type;
 };
 
@@ -223,12 +229,16 @@ template<typename T>
 struct type_traits<T, typename std::enable_if<std::is_unsigned<T>::value &&
 	!std::is_floating_point<T>::value>::type>
 {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef uint64_t type;
 };
 
 // Enum type traits
 template<typename T>
 struct type_traits<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef typename std::underlying_type<T>::type underlying;
 	typedef typename type_traits<underlying>::type type;
 };
@@ -236,129 +246,112 @@ struct type_traits<T, typename std::enable_if<std::is_enum<T>::value>::type> {
 // String type_traits
 template<>
 struct type_traits<const char *, void> {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef std::string type;
 };
-template<>
-struct type_traits<const char [], void> {
+template<size_t N>
+struct type_traits<char[N], void> {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef std::string type;
 };
 template<>
 struct type_traits<std::string, void> {
+	typedef std::true_type is_scalar;
+	typedef std::false_type is_vector;
 	typedef std::string type;
 };
 
 // Container type_traits
 template<typename T, std::size_t N>
 struct type_traits<T[N], void> {
-	typedef typename type_traits<T>::type value_type;
+	typedef std::false_type is_scalar;
+	typedef std::true_type is_vector;
+	typedef T source_type;
+	typedef typename type_traits<source_type>::type value_type;
 	typedef std::vector<value_type> type;
 };
 template<typename T, std::size_t N>
 struct type_traits<std::array<T, N>, void> {
-	typedef typename type_traits<T>::type value_type;
+	typedef std::false_type is_scalar;
+	typedef std::true_type is_vector;
+	typedef T source_type;
+	typedef typename type_traits<source_type>::type value_type;
 	typedef std::vector<value_type> type;
 };
 template<template <typename...> class C, typename... A>
 struct type_traits<C<A...>, void> {
-	typedef typename type_traits<typename C<A...>::value_type>::type value_type;
+	typedef std::false_type is_scalar;
+	typedef std::true_type is_vector;
+	typedef typename C<A...>::value_type source_type;
+	typedef typename type_traits<source_type>::type value_type;
 	typedef std::vector<value_type> type;
 };
 
 } // namespace detail
 
-// Value
-template <typename T>
-struct TestValue {
-	typedef typename std::conditional<std::is_unsigned<T>::value, uint64_t,
-		typename std::conditional<std::is_signed<T>::value || std::is_enum<T>::value,
-			int64_t, T>::type>::type type;
-
-	const std::vector<type> value;
-	const bool agregate;
-
-	TestValue(const T &iv)
-		: value(1, iv), agregate(false) {}
-	template<typename I>
-	TestValue(const I &begin, const I &end)
-		: value(begin, end), agregate(true) {}
-};
-
 struct TestValueFactory {
-	template <typename T>
-	static TestValue<T> create(const T &t) {
-		return TestValue<T>(t);
+	template<typename T, typename R = detail::type_traits<T>>
+	static typename R::type createImpl(const T &t,
+		const std::true_type &, const std::false_type &)
+	{
+		return static_cast<typename R::type>(t);
 	}
-	template<typename T>
-	static TestValue<T> create(const std::initializer_list<T> &t) {
-		return TestValue<T>(t.begin(), t.end());
+	template<typename T, typename R = detail::type_traits<T>>
+	static typename R::type createImpl(const T &t,
+		const std::false_type &, const std::true_type &)
+	{
+		typename R::type result;
+		std::transform(std::begin(t), std::end(t), std::back_inserter(result),
+			[](const typename R::source_type &t) {
+				return create(t);
+			});
+		return result;
 	}
-	template<typename T>
-	static TestValue<T> create(const std::initializer_list<const T> &t) {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T>
-	static TestValue<T> create(const std::list<T> &t) {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T>
-	static TestValue<T> create(const std::vector<T> &t) {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T, std::size_t size>
-	static TestValue<T> create(const std::array<T, size> &t) {
-		return TestValue<T>(t.begin(), t.end());
-	}
-	template<typename T, std::size_t size>
-	static TestValue<T> create(const T (&t)[size]) {
-		return TestValue<T>(&t[0], &t[size]);
-	}
-	static TestValue<std::string> create(const char *t) {
-		return TestValue<std::string>(t);
+	template<typename T, typename R = detail::type_traits<T>>
+	static typename R::type create(const T &t) {
+		return createImpl(t, typename R::is_scalar(), typename R::is_vector());
 	}
 };
 
 class TestEqual {
-	template <typename A, typename B, typename AI, typename BI>
-	bool isEqualDiffer(const TestValue<A> &, const TestValue<B> &, AI, BI) const {
+	template <typename A, typename B>
+	bool isEqualValue(const A &, const B &) const {
 		return false;
 	}
-
 	template <typename A, typename B>
-	bool isEqualSign(const TestValue<A> &ta, const TestValue<B> &tb) const {
-		typedef typename TestValue<A>::type atype;
-		typedef typename TestValue<B>::type btype;
-		const atype amax = std::numeric_limits<atype>::max();
-		const btype bmin = std::numeric_limits<btype>::min();
-		for (size_t i = 0; i < ta.value.size(); i++) {
-			if (ta.value[i] < static_cast<atype>(bmin)) return false;
-			if (tb.value[i] > static_cast<btype>(amax)) return false;
-			if (tb.value[i] != static_cast<btype>(ta.value[i])) return false;
-		}
-		return true;
+	bool isEqualValue(const std::vector<A> &ta, const std::vector<B> &tb) const {
+		typedef typename std::vector<A>::value_type atype;
+		typedef typename std::vector<B>::value_type btype;
+		return std::equal(std::begin(ta), std::end(ta), std::begin(tb),
+			[this](const atype &a, const btype &b) {
+				return isEqualValue(a, b);
+			});
 	}
-	template <typename A, typename B>
-	bool isEqualDiffer(const TestValue<A> &ta, const TestValue<B> &tb,
-			   std::true_type, std::true_type) const
-	{
-		if (ta.agregate != tb.agregate) return false;
-		if (ta.value.size() != tb.value.size()) return false;
-		if (std::is_signed<typename TestValue<A>::type>::value) return isEqualSign(ta, tb);
-		return isEqualSign(tb, ta);
+	bool isEqualValue(int64_t ta, uint64_t tb) const {
+		if (ta < 0) return false;
+		if (tb > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) return false;
+		return ta == static_cast<int64_t>(tb);
 	}
-
-	template <typename A, typename B>
-	bool isEqualValue(const TestValue<A> &ta, const TestValue<B> &tb) const {
-		return isEqualDiffer(ta, tb, typename std::is_integral<A>::type(),
-				typename std::is_integral<B>::type());
+	bool isEqualValue(uint64_t ta, int64_t tb) const {
+		return isEqualValue(tb, ta);
 	}
-
-	// Compare equivalent values
 	template <typename T>
-	bool isEqualValue(const TestValue<T> &ta, const TestValue<T> &tb) const {
-		return ta.agregate == tb.agregate && ta.value == tb.value;
+	bool isEqualValue(const T &ta, const T &tb) const {
+		return ta == tb;
+	}
+	template <typename T>
+	bool isEqualValue(const std::vector<T> &ta, const std::vector<T> &tb) const {
+		typedef typename std::vector<T>::value_type type;
+		return std::equal(std::begin(ta), std::end(ta), std::begin(tb),
+			[this](const type &a, const type &b) {
+				return isEqualValue(a, b);
+			});
 	}
 public:
 	virtual ~TestEqual() = default;
+
 	template <typename A, typename B>
 	bool isEqual(const A &a, const B &b) const {
 		const auto ta = TestValueFactory::create(a);
@@ -370,23 +363,28 @@ public:
 class TestPrinter {
 protected:
 	template <typename T>
-	std::string printableValue(const TestValue<T> &tt) const {
+	std::string printableValue(const T &tt) const {
 		std::ostringstream os;
-		if (tt.agregate) { os << "{ "; }
-		for (size_t p = 0; p < tt.value.size(); p++) {
-			os << tt.value[p] << (p + 1 < tt.value.size() ? ", " : "");
-		}
-		if (tt.agregate) { os << " }"; }
+		os << tt;
 		return os.str();
 	}
-	std::string printableValue(const TestValue<std::string> &tt) const {
+	template <typename T>
+	std::string printableValue(const std::vector<T> &tt) const {
 		std::ostringstream os;
-		if (tt.agregate) { os << "{ "; }
-		for (size_t p = 0; p < tt.value.size(); p++) {
-			os << "\"" << tt.value[p] << "\"" << (p + 1 < tt.value.size() ? ", " : "");
+		os << "{ ";
+		for (size_t p = 0; p < tt.size(); p++) {
+			os << printableValue(tt[p]) << ((p + 1 < tt.size()) ? ", " : "");
 		}
-		if (tt.agregate) { os << " }"; }
+		os << " }";
 		return os.str();
+	}
+	std::string printableValue(bool tt) const {
+		std::ostringstream os;
+		os << std::boolalpha << tt;
+		return os.str();
+	}
+	std::string printableValue(const std::string &tt) const {
+		return "\"" + tt + "\"";
 	}
 public:
 	virtual ~TestPrinter() = default;
