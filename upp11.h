@@ -196,6 +196,77 @@ public:
 	}
 };
 
+namespace detail {
+
+// Generic type_traits (should applicable only for comparable values)
+template<typename T, typename E = void>
+struct type_traits {
+	typedef typename std::decay<T>::type type;
+};
+
+// Bool type_traits
+template<>
+struct type_traits<bool, void> {
+	typedef bool type;
+};
+
+// Signed int type_traits
+template<typename T>
+struct type_traits<T, typename std::enable_if<std::is_signed<T>::value &&
+	!std::is_floating_point<T>::value>::type>
+{
+	typedef int64_t type;
+};
+
+// Unsigned int type_traits
+template<typename T>
+struct type_traits<T, typename std::enable_if<std::is_unsigned<T>::value &&
+	!std::is_floating_point<T>::value>::type>
+{
+	typedef uint64_t type;
+};
+
+// Enum type traits
+template<typename T>
+struct type_traits<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+	typedef typename std::underlying_type<T>::type underlying;
+	typedef typename type_traits<underlying>::type type;
+};
+
+// String type_traits
+template<>
+struct type_traits<const char *, void> {
+	typedef std::string type;
+};
+template<>
+struct type_traits<const char [], void> {
+	typedef std::string type;
+};
+template<>
+struct type_traits<std::string, void> {
+	typedef std::string type;
+};
+
+// Container type_traits
+template<typename T, std::size_t N>
+struct type_traits<T[N], void> {
+	typedef typename type_traits<T>::type value_type;
+	typedef std::vector<value_type> type;
+};
+template<typename T, std::size_t N>
+struct type_traits<std::array<T, N>, void> {
+	typedef typename type_traits<T>::type value_type;
+	typedef std::vector<value_type> type;
+};
+template<template <typename...> class C, typename... A>
+struct type_traits<C<A...>, void> {
+	typedef typename type_traits<typename C<A...>::value_type>::type value_type;
+	typedef std::vector<value_type> type;
+};
+
+} // namespace detail
+
+// Value
 template <typename T>
 struct TestValue {
 	typedef typename std::conditional<std::is_unsigned<T>::value, uint64_t,

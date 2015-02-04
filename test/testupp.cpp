@@ -120,21 +120,20 @@ UP_TEST(AssertNeShouldCompareAnyTypes)
 	UP_ASSERT_NE(-1, numeric_limits<unsigned>::max());
 }
 
-//UP_TEST(AssertCompareEnums)
-//{
-//	enum { ie = 12345 };
-//	const int ii = 12345;
-//	const unsigned iu = 12345;
-//
-//	UP_ASSERT_EQUAL(ii, ie);
-//	UP_ASSERT_EQUAL(ie, iu);
-//	UP_ASSERT_EQUAL(iu, ie);
-//
-//	// TODO: need static_cast in TestValue
-//	//enum class strong : uint64_t { is = 12345 };
-//	//UP_ASSERT_EQUAL(iu, strong::is);
-//	//UP_ASSERT_EQUAL(strong::is, ii);
-//}
+UP_TEST(AssertCompareEnums)
+{
+	enum { ie = 12345 };
+	const int ii = 12345;
+	const unsigned iu = 12345;
+
+	UP_ASSERT_EQUAL(ii, ie);
+	UP_ASSERT_EQUAL(ie, iu);
+	UP_ASSERT_EQUAL(iu, ie);
+
+	enum class strong : uint64_t { is = 12345 };
+	UP_ASSERT_EQUAL(iu, strong::is);
+	UP_ASSERT_EQUAL(strong::is, ii);
+}
 
 UP_SUITE_END()
 

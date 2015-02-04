@@ -16,3 +16,5 @@
 *.actual
 testupp
 testfailures
+
+.ycm_extra_conf.py*

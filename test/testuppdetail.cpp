@@ -35,6 +35,13 @@ UP_SUITE_END()
 
 UP_SUITE_BEGIN(suiteOutput)
 
+UP_FIXTURE_TEST(PrimitiveOutputTest, TestPrinter)
+{
+	UP_ASSERT_EQUAL(printable(1), "1");
+	UP_ASSERT_EQUAL(printable(1LLU), "1");
+	UP_ASSERT_EQUAL(printable(true), "true");
+}
+
 const auto int_values = {
 	make_pair(-1, "-1"),
 	make_pair(0, "0"),
