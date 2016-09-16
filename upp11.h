@@ -14,6 +14,7 @@
 #include <getopt.h>
 #include <signal.h>
 #include <setjmp.h>
+#include <random>
 
 namespace upp11 {
 
