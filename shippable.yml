@@ -1,0 +1,9 @@
+language: c
+
+# TODO: Very old ubuntu image 14.04, clang is not work with c++11
+compiler:
+  - gcc
+
+build:
+  ci:
+    make check
